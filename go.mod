@@ -2,6 +2,8 @@ module golang_tg
 
 go 1.20
 
+require github.com/gotd/td v0.87.0
+
 require (
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
 	github.com/go-faster/errors v0.6.1 // indirect
@@ -9,7 +11,6 @@ require (
 	github.com/go-faster/xor v1.0.0 // indirect
 	github.com/gotd/ige v0.2.2 // indirect
 	github.com/gotd/neo v0.1.5 // indirect
-	github.com/gotd/td v0.87.0 // indirect
 	github.com/klauspost/compress v1.16.7 // indirect
 	github.com/segmentio/asm v1.2.0 // indirect
 	go.opentelemetry.io/otel v1.18.0 // indirect
