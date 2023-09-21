@@ -15,7 +15,7 @@ func main() {
 		panic(err)
 	}
 
-	root := filepath.Join(home, "Downloads", "Telegram", "tdata")
+	root := filepath.Join(home, "Documents", "Telegram", "tdata")
 	accounts, err := tdesktop.Read(root, nil)
 	if err != nil {
 		panic(err)
