@@ -9,9 +9,11 @@ import (
 	"github.com/gotd/td/session"
 	"github.com/gotd/td/session/tdesktop"
 	"github.com/gotd/td/telegram"
+	"github.com/gotd/td/telegram/message/unpack"
+	"github.com/gotd/td/tg"
 )
 
-func check2() {
+func check3() {
 	ctx := context.Background()
 	home, err := os.UserHomeDir()
 	if err != nil {
@@ -41,9 +43,19 @@ func check2() {
 	client := telegram.NewClient(1, "s", telegram.Options{SessionStorage: storage})
 
 	if err := client.Run(ctx, func(ctx context.Context) error {
+		raw := tg.NewClient(client)
+		req := tg.ChannelsCreateChannelRequest{
+			Title: "test",
+			About: "test about",
+		}
+		res, e := raw.ChannelsCreateChannel(ctx, &req)
+		msg, err := unpack.Message(res, e)
+		fmt.Println(msg)
+		//req_photo := tg.ChannelsEditPhotoRequest{}
 
-		d, _ := client.Self(ctx)
-		fmt.Println("Успешно авторизовались: ", d.FirstName, d.LastName)
+		fmt.Println(res, e)
+		//raw.ChannelsEditPhoto()
+
 		return err
 	}); err != nil {
 		panic(err)
