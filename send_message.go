@@ -9,11 +9,11 @@ import (
 	"github.com/gotd/td/session"
 	"github.com/gotd/td/session/tdesktop"
 	"github.com/gotd/td/telegram"
-	"github.com/gotd/td/telegram/uploader"
-	//"github.com/gotd/td/tg"
+	"github.com/gotd/td/telegram/message"
+	"github.com/gotd/td/tg"
 )
 
-func check3() {
+func check4() {
 	ctx := context.Background()
 	home, err := os.UserHomeDir()
 	if err != nil {
@@ -43,32 +43,10 @@ func check3() {
 	client := telegram.NewClient(1, "s", telegram.Options{SessionStorage: storage})
 
 	if err := client.Run(ctx, func(ctx context.Context) error {
-		// raw := tg.NewClient(client)
+		raw := tg.NewClient(client)
 
-		// req := tg.ChannelsCreateChannelRequest{
-		// 	Title:     "test",
-		// 	About:     "test about",
-		// 	Broadcast: true,
-		// 	Megagroup: false,
-		// }
-
-		// res, e := raw.ChannelsCreateChannel(ctx, &req)
-		// time.Sleep(time.Second * 2)
-		// msg, err := unpack.Message(res, e)
-		// fmt.Println(msg)
-		// channel := ((*res.(*tg.Updates)).Chats[0]).(*tg.Channel)
-		// fmt.Println(channel.ID, channel.AccessHash)
-
-		// ch_input := tg.InputPeerChannel{
-		// 	ChannelID:  channel.ID,
-		// 	AccessHash: channel.AccessHash,
-		// }
-		//chan,_ := tg.InputChannel(ch_input)
-		//fmt.Println(ch_input)
-		f, _ := os.ReadFile("skull.jpg")
-		up := uploader.Uploader{}
-		file, _ := up.FromBytes(ctx, "test", f)
-		fmt.Println(file)
+		sender := message.NewSender(raw).Resolve("@hitriydima")
+		fmt.Println(sender)
 
 		return err
 	}); err != nil {
