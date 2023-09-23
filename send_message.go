@@ -45,7 +45,8 @@ func check4() {
 	if err := client.Run(ctx, func(ctx context.Context) error {
 		raw := tg.NewClient(client)
 
-		sender := message.NewSender(raw).Resolve("@hitriydima")
+		sender, _ := message.NewSender(raw).Resolve("@hitriydima").Text(ctx, "Ha ha ha")
+
 		fmt.Println(sender)
 
 		return err

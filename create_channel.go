@@ -43,7 +43,7 @@ func check3() {
 	client := telegram.NewClient(1, "s", telegram.Options{SessionStorage: storage})
 
 	if err := client.Run(ctx, func(ctx context.Context) error {
-		// raw := tg.NewClient(client)
+		//raw := tg.NewClient(client)
 
 		// req := tg.ChannelsCreateChannelRequest{
 		// 	Title:     "test",
