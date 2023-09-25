@@ -9,11 +9,10 @@ import (
 	"github.com/gotd/td/session"
 	"github.com/gotd/td/session/tdesktop"
 	"github.com/gotd/td/telegram"
-	"github.com/gotd/td/telegram/message"
 	"github.com/gotd/td/tg"
 )
 
-func check4() {
+func check5() {
 	ctx := context.Background()
 	home, err := os.UserHomeDir()
 	if err != nil {
@@ -44,11 +43,12 @@ func check4() {
 
 	if err := client.Run(ctx, func(ctx context.Context) error {
 		raw := tg.NewClient(client)
-		
+		req := tg.MessagesSearchGlobalRequest{
+			Q: "Приколы",
+		}
+		res, _ := raw.MessagesSearchGlobal(ctx, &req)
 
-		sender, _ := message.NewSender(raw).Resolve("@hitriydima").Text(ctx, "Ha ha ha")
-
-		fmt.Println(sender)
+		fmt.Println(res)
 
 		return err
 	}); err != nil {
