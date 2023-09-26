@@ -10,7 +10,7 @@ import (
 	"github.com/gotd/td/session/tdesktop"
 	"github.com/gotd/td/telegram"
 	"github.com/gotd/td/telegram/uploader"
-	//"github.com/gotd/td/tg"
+	"github.com/gotd/td/tg"
 )
 
 func check3() {
@@ -43,19 +43,18 @@ func check3() {
 	client := telegram.NewClient(1, "s", telegram.Options{SessionStorage: storage})
 
 	if err := client.Run(ctx, func(ctx context.Context) error {
-		//raw := tg.NewClient(client)
+		raw := tg.NewClient(client)
 
 		// req := tg.ChannelsCreateChannelRequest{
-		// 	Title:     "test",
+		// 	Title:     "test2",
 		// 	About:     "test about",
 		// 	Broadcast: true,
 		// 	Megagroup: false,
 		// }
 
 		// res, e := raw.ChannelsCreateChannel(ctx, &req)
-		// time.Sleep(time.Second * 2)
-		// msg, err := unpack.Message(res, e)
-		// fmt.Println(msg)
+
+		// fmt.Println(e)
 		// channel := ((*res.(*tg.Updates)).Chats[0]).(*tg.Channel)
 		// fmt.Println(channel.ID, channel.AccessHash)
 
@@ -63,12 +62,21 @@ func check3() {
 		// 	ChannelID:  channel.ID,
 		// 	AccessHash: channel.AccessHash,
 		// }
-		//chan,_ := tg.InputChannel(ch_input)
-		//fmt.Println(ch_input)
-		f, _ := os.ReadFile("skull.jpg")
-		up := uploader.Uploader{}
-		file, _ := up.FromBytes(ctx, "test", f)
-		fmt.Println(file)
+
+		ch_input := tg.InputChannel{ChannelID: 1905046891, AccessHash: 5725182504979867499}
+		//photo := tg.InputChatUploadedPhoto{}
+
+		//up := tg.ChannelsEditPhotoRequest{}
+		fmt.Println(ch_input)
+		//f, _ := os.ReadFile("skull.jpg")
+		upl := uploader.Uploader{}
+		upl.WithPartSize(1024)
+		upl.WithThreads(1)
+		fl, err_f := upl.FromPath(ctx, "skull.jpg")
+
+		fmt.Println(fl)
+		fmt.Println(err_f)
+		fmt.Println(raw)
 
 		return err
 	}); err != nil {

@@ -12,7 +12,7 @@ import (
 	"github.com/gotd/td/tg"
 )
 
-func check5() {
+func check8() {
 	ctx := context.Background()
 	home, err := os.UserHomeDir()
 	if err != nil {
@@ -44,14 +44,12 @@ func check5() {
 	if err := client.Run(ctx, func(ctx context.Context) error {
 		raw := tg.NewClient(client)
 
-		req := tg.MessagesSearchGlobalRequest{
-			Q:          "Привет",
-			Limit:      10,
-			Filter:     &tg.InputMessagesFilterEmpty{},
-			OffsetPeer: &tg.InputPeerEmpty{},
+		req := tg.ContactsSearchRequest{
+			Q:     "казино чат",
+			Limit: 10,
 		}
 
-		res, e := raw.MessagesSearchGlobal(ctx, &req)
+		res, e := raw.ContactsSearch(ctx, &req)
 
 		fmt.Println(res)
 		fmt.Println(e)

@@ -47,6 +47,7 @@ func iter_message() {
 
 	if err := client.Run(ctx, func(ctx context.Context) error {
 		raw := tg.NewClient(client)
+		//raw.Query(ctx, &query.Query{}
 		cb := func(ctx context.Context, dlg dialogs.Elem) error {
 			// Skip deleted dialogs.
 			if dlg.Deleted() {

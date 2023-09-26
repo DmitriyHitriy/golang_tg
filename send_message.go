@@ -43,8 +43,10 @@ func check4() {
 	client := telegram.NewClient(1, "s", telegram.Options{SessionStorage: storage})
 
 	if err := client.Run(ctx, func(ctx context.Context) error {
+		s, _ := client.Self(ctx)
+		fmt.Println(s.FirstName)
+
 		raw := tg.NewClient(client)
-		
 
 		sender, _ := message.NewSender(raw).Resolve("@hitriydima").Text(ctx, "Ha ha ha")
 

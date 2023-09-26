@@ -12,7 +12,7 @@ import (
 	"github.com/gotd/td/tg"
 )
 
-func check5() {
+func check6() {
 	ctx := context.Background()
 	home, err := os.UserHomeDir()
 	if err != nil {
@@ -43,18 +43,21 @@ func check5() {
 
 	if err := client.Run(ctx, func(ctx context.Context) error {
 		raw := tg.NewClient(client)
+		ch := &tg.InputChannel{ChannelID: 1337318424, AccessHash: 4419570524830746652}
 
-		req := tg.MessagesSearchGlobalRequest{
-			Q:          "Привет",
-			Limit:      10,
-			Filter:     &tg.InputMessagesFilterEmpty{},
-			OffsetPeer: &tg.InputPeerEmpty{},
-		}
-
-		res, e := raw.MessagesSearchGlobal(ctx, &req)
+		res, e := raw.ChannelsJoinChannel(ctx, ch)
 
 		fmt.Println(res)
 		fmt.Println(e)
+
+		req := tg.ChannelsGetParticipantsRequest{
+			Channel: ch,
+			Limit:   100,
+			Filter:  &tg.ChannelParticipantsRecent{},
+		}
+		res_part, ee := raw.ChannelsGetParticipants(ctx, &req)
+		fmt.Println(res_part)
+		fmt.Println(ee)
 
 		return err
 	}); err != nil {
