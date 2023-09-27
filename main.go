@@ -1,5 +1,5 @@
 package main
 
 func main() {
-	check3()
+	generate_channel("Лежбище котиков", "Крутой канал про котиков", "bear.jpg")
 }

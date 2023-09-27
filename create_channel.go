@@ -9,12 +9,11 @@ import (
 	"github.com/gotd/td/session"
 	"github.com/gotd/td/session/tdesktop"
 	"github.com/gotd/td/telegram"
-	"github.com/gotd/td/telegram/uploader"
 	"github.com/gotd/td/telegram/message"
 	"github.com/gotd/td/tg"
 )
 
-func check3() {
+func generate_channel(name string, about string, photo_path string) {
 	ctx := context.Background()
 	home, err := os.UserHomeDir()
 	if err != nil {
@@ -46,48 +45,66 @@ func check3() {
 	if err := client.Run(ctx, func(ctx context.Context) error {
 		raw := tg.NewClient(client)
 
-		// req := tg.ChannelsCreateChannelRequest{
-		// 	Title:     "test2",
-		// 	About:     "test about",
-		// 	Broadcast: true,
-		// 	Megagroup: false,
-		// }
+		// Создаем канал
+		req := tg.ChannelsCreateChannelRequest{
+			Title:     name,
+			About:     about,
+			Broadcast: true,
+			Megagroup: false,
+		}
 
-		// res, e := raw.ChannelsCreateChannel(ctx, &req)
+		res, _ := raw.ChannelsCreateChannel(ctx, &req)
+		channel := ((*res.(*tg.Updates)).Chats[0]).(*tg.Channel)
 
-		// fmt.Println(e)
-		// channel := ((*res.(*tg.Updates)).Chats[0]).(*tg.Channel)
-		// fmt.Println(channel.ID, channel.AccessHash)
+		ch_input := tg.InputChannel{
+			ChannelID:  channel.ID,
+			AccessHash: channel.AccessHash,
+		}
 
-		// ch_input := tg.InputChannel{
-		// 	ChannelID:  channel.ID,
-		// 	AccessHash: channel.AccessHash,
-		// }
+		// Для теста временно. Убрать потом
+		//ch_input := tg.InputChannel{ChannelID: 1905046891, AccessHash: 5725182504979867499}
 
-		ch_input := tg.InputChannel{ChannelID: 1905046891, AccessHash: 5725182504979867499}
-		
-		//fmt.Println(ch_input)
-		//f, _ := os.ReadFile("skull.jpg")
-		upl := uploader.NewUploader(raw)
-		//upl.WithPartSize(1024)
-		//upl.WithThreads(8)
-		fl, err_f := upl.FromPath(ctx, "skull2.jpg")
+		// Генерируем имя канала и назначаем его каналу до тех пор пока ТГ не примет его
+		var channel_username string
+		for {
+			tmp_channel_username := generate_name()
+			n := tg.ChannelsUpdateUsernameRequest{
+				Channel:  &ch_input,
+				Username: tmp_channel_username,
+			}
 
-		in_photo := tg.InputPhoto{ID: (*fl.(*tg.InputFile)).ID}
-		
-		photo := tg.InputChatPhoto{ID: &in_photo}
+			res_update_username, _ := raw.ChannelsUpdateUsername(ctx, &n)
+
+			if res_update_username {
+				channel_username = tmp_channel_username
+				break
+			}
+		}
+
+		// Отправляем в канал фото, чтобы поставить его на аватарку
+		nm, _ := message.NewSender(raw).Resolve(channel_username).Upload(message.Upload(func(ctx context.Context, b message.Uploader) (tg.InputFileClass, error) {
+			r, err := b.FromPath(ctx, photo_path)
+			if err != nil {
+				return nil, err
+			}
+
+			return r, nil
+		})).Photo(ctx)
+
+		photo := (*(*(*(*(*nm.(*tg.Updates)).Updates[2].(*tg.UpdateNewChannelMessage)).Message.(*tg.Message)).Media.(*tg.MessageMediaPhoto)).Photo.(*tg.Photo))
+
+		// Ставим загруженное фото на аватарку
+		in_photo := tg.InputPhoto{ID: photo.ID, AccessHash: photo.AccessHash, FileReference: photo.FileReference}
+		chat_photo := tg.InputChatPhoto{ID: &in_photo}
 
 		req_photo := tg.ChannelsEditPhotoRequest{
-			Channel: &ch_input, 
-			Photo: &photo,
+			Channel: &ch_input,
+			Photo:   &chat_photo,
 		}
-		
-		change, err_upl_file := raw.ChannelsEditPhoto(ctx, &req_photo)
-		fmt.Println(change)
-		fmt.Println(err_upl_file)
-		fmt.Println(fl)
-		fmt.Println(err_f)
-		fmt.Println(raw)
+
+		res_change_photo, _ := raw.ChannelsEditPhoto(ctx, &req_photo)
+
+		fmt.Println(res_change_photo)
 
 		return err
 	}); err != nil {
