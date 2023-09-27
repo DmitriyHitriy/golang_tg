@@ -10,6 +10,7 @@ import (
 	"github.com/gotd/td/session/tdesktop"
 	"github.com/gotd/td/telegram"
 	"github.com/gotd/td/telegram/uploader"
+	"github.com/gotd/td/telegram/message"
 	"github.com/gotd/td/tg"
 )
 
@@ -58,22 +59,32 @@ func check3() {
 		// channel := ((*res.(*tg.Updates)).Chats[0]).(*tg.Channel)
 		// fmt.Println(channel.ID, channel.AccessHash)
 
-		// ch_input := tg.InputPeerChannel{
+		// ch_input := tg.InputChannel{
 		// 	ChannelID:  channel.ID,
 		// 	AccessHash: channel.AccessHash,
 		// }
 
 		ch_input := tg.InputChannel{ChannelID: 1905046891, AccessHash: 5725182504979867499}
-		//photo := tg.InputChatUploadedPhoto{}
-
-		//up := tg.ChannelsEditPhotoRequest{}
-		fmt.Println(ch_input)
+		
+		//fmt.Println(ch_input)
 		//f, _ := os.ReadFile("skull.jpg")
-		upl := uploader.Uploader{}
-		upl.WithPartSize(1024)
-		upl.WithThreads(1)
+		upl := uploader.NewUploader(raw)
+		//upl.WithPartSize(1024)
+		//upl.WithThreads(8)
 		fl, err_f := upl.FromPath(ctx, "skull.jpg")
 
+		in_photo := tg.InputPhoto{ID: (*fl.(*tg.InputFile)).ID}
+		
+		photo := tg.InputChatPhoto{ID: &in_photo}
+
+		req_photo := tg.ChannelsEditPhotoRequest{
+			Channel: &ch_input, 
+			Photo: &photo,
+		}
+		
+		change, err_upl_file := raw.ChannelsEditPhoto(ctx, &req_photo)
+		fmt.Println(change)
+		fmt.Println(err_upl_file)
 		fmt.Println(fl)
 		fmt.Println(err_f)
 		fmt.Println(raw)
