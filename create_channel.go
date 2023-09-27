@@ -71,7 +71,7 @@ func check3() {
 		upl := uploader.NewUploader(raw)
 		//upl.WithPartSize(1024)
 		//upl.WithThreads(8)
-		fl, err_f := upl.FromPath(ctx, "skull.jpg")
+		fl, err_f := upl.FromPath(ctx, "skull2.jpg")
 
 		in_photo := tg.InputPhoto{ID: (*fl.(*tg.InputFile)).ID}
 		
