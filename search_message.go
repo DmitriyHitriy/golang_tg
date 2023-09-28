@@ -12,7 +12,7 @@ import (
 	"github.com/gotd/td/tg"
 )
 
-func check5() {
+func search_messages(query string, limit int) []*tg.User {
 	ctx := context.Background()
 	home, err := os.UserHomeDir()
 	if err != nil {
@@ -40,18 +40,23 @@ func check5() {
 	}
 
 	client := telegram.NewClient(1, "s", telegram.Options{SessionStorage: storage})
+	var users []*tg.User
 
 	if err := client.Run(ctx, func(ctx context.Context) error {
 		raw := tg.NewClient(client)
 
 		req := tg.MessagesSearchGlobalRequest{
-			Q:          "Привет",
-			Limit:      10,
+			Q:          query,
+			Limit:      limit,
 			Filter:     &tg.InputMessagesFilterEmpty{},
 			OffsetPeer: &tg.InputPeerEmpty{},
 		}
 
 		res, e := raw.MessagesSearchGlobal(ctx, &req)
+
+		for _, user := range (*res.(*tg.MessagesMessages)).Users {
+			users = append(users, user.(*tg.User))
+		}
 
 		fmt.Println(res)
 		fmt.Println(e)
@@ -60,4 +65,6 @@ func check5() {
 	}); err != nil {
 		panic(err)
 	}
+
+	return users
 }

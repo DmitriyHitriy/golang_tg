@@ -12,7 +12,7 @@ import (
 	"github.com/gotd/td/tg"
 )
 
-func check7() {
+func invite_to_channel(ch *tg.InputChannel, us *tg.InputUser) bool {
 	ctx := context.Background()
 	home, err := os.UserHomeDir()
 	if err != nil {
@@ -41,15 +41,26 @@ func check7() {
 
 	client := telegram.NewClient(1, "s", telegram.Options{SessionStorage: storage})
 
+	//ch := &tg.InputChannel{ChannelID: 1905046891, AccessHash: 5725182504979867499}
+	//us := &tg.InputUser{UserID: 5419321810, AccessHash: -5698706159390738840}
+	user_info, _ := client.API().UsersGetUsers(ctx, []tg.InputUserClass{us})
+	//fmt.Println(user_info)
+
 	if err := client.Run(ctx, func(ctx context.Context) error {
 		raw := tg.NewClient(client)
-		ch := &tg.InputChannel{ChannelID: 1905046891, AccessHash: 5725182504979867499}
-		us := &tg.InputUser{UserID: 5419321810, AccessHash: -5698706159390738840}
 
 		//users := []tg.InputUser{*us}
 
-		req := tg.ChannelsInviteToChannelRequest{ch, []tg.InputUserClass{us}}
+		req := tg.ChannelsInviteToChannelRequest{
+			Channel: ch,
+			Users:   []tg.InputUserClass{us},
+		}
+
 		res, e := raw.ChannelsInviteToChannel(ctx, &req)
+
+		if e != nil {
+			fmt.Println((*user_info[0].(*tg.User)).FirstName, (*user_info[0].(*tg.User)).LastName, " ошибка при приглашении в канал", e)
+		}
 
 		fmt.Println(res)
 		fmt.Println(e)
@@ -58,4 +69,7 @@ func check7() {
 	}); err != nil {
 		panic(err)
 	}
+
+	fmt.Println((*user_info[0].(*tg.User)).FirstName, (*user_info[0].(*tg.User)).LastName, " успешно пригласил в канал")
+	return true
 }
