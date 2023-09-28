@@ -12,7 +12,7 @@ import (
 	"github.com/gotd/td/tg"
 )
 
-func check8() {
+func search_contact(query string, limit int) []*tg.Channel {
 	ctx := context.Background()
 	home, err := os.UserHomeDir()
 	if err != nil {
@@ -39,17 +39,25 @@ func check8() {
 		panic(err)
 	}
 
+	var chats_results []*tg.Channel
+
 	client := telegram.NewClient(1, "s", telegram.Options{SessionStorage: storage})
 
 	if err := client.Run(ctx, func(ctx context.Context) error {
 		raw := tg.NewClient(client)
 
 		req := tg.ContactsSearchRequest{
-			Q:     "казино чат",
-			Limit: 10,
+			Q:     query,
+			Limit: limit,
 		}
 
 		res, e := raw.ContactsSearch(ctx, &req)
+		
+
+		for _, chat := range (*res).Chats {
+			chats_results = append(chats_results, chat.(*tg.Channel))
+			fmt.Println(chat)
+		}
 
 		fmt.Println(res)
 		fmt.Println(e)
@@ -58,4 +66,6 @@ func check8() {
 	}); err != nil {
 		panic(err)
 	}
+
+	return chats_results
 }
