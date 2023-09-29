@@ -12,6 +12,7 @@ import (
 	"github.com/gotd/td/tg"
 )
 
+// Найти список пользователей которые когда либо писали в чатах искомые поисковые запросы.
 func search_messages(query string, limit int) []*tg.User {
 	ctx := context.Background()
 	home, err := os.UserHomeDir()
