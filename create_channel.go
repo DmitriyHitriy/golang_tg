@@ -50,7 +50,7 @@ func TGToolsGenerateChannel(name string, about string, photo_path string) {
 		// Для теста временно. Убрать потом
 		//ch_input := tg.InputChannel{ChannelID: 1905046891, AccessHash: 5725182504979867499}
 
-		// Генерируем имя канала и назначаем его каналу
+		// Генерируем имя канала и назначаем его каналу 2
 		channel_username := change_name_channel(&ctx, ch_input, raw)
 		
 		// Устанавливаем аватарку каналу
