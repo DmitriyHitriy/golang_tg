@@ -12,7 +12,7 @@ import (
 	"github.com/gotd/td/tg"
 )
 
-func check6() {
+func get_participants_in_channel(channel_id int64, access_hash int64) {
 	ctx := context.Background()
 	home, err := os.UserHomeDir()
 	if err != nil {
@@ -43,7 +43,8 @@ func check6() {
 
 	if err := client.Run(ctx, func(ctx context.Context) error {
 		raw := tg.NewClient(client)
-		ch := &tg.InputChannel{ChannelID: 1337318424, AccessHash: 4419570524830746652}
+		//ch := &tg.InputChannel{ChannelID: 1337318424, AccessHash: 4419570524830746652}
+		ch := &tg.InputChannel{ChannelID: channel_id, AccessHash: access_hash}
 
 		res, e := raw.ChannelsJoinChannel(ctx, ch)
 

@@ -43,7 +43,7 @@ func invite_to_channel(ch *tg.InputChannel, us *tg.InputUser) bool {
 
 	//ch := &tg.InputChannel{ChannelID: 1905046891, AccessHash: 5725182504979867499}
 	//us := &tg.InputUser{UserID: 5419321810, AccessHash: -5698706159390738840}
-	user_info, _ := client.API().UsersGetUsers(ctx, []tg.InputUserClass{us})
+	//user_info, _ := client.API().UsersGetUsers(ctx, []tg.InputUserClass{us})
 	//fmt.Println(user_info)
 
 	if err := client.Run(ctx, func(ctx context.Context) error {
@@ -59,7 +59,8 @@ func invite_to_channel(ch *tg.InputChannel, us *tg.InputUser) bool {
 		res, e := raw.ChannelsInviteToChannel(ctx, &req)
 
 		if e != nil {
-			fmt.Println((*user_info[0].(*tg.User)).FirstName, (*user_info[0].(*tg.User)).LastName, " ошибка при приглашении в канал", e)
+			fmt.Println("Ошибка добавления в канал ", e)
+			//fmt.Println((*user_info[0].(*tg.User)).FirstName, (*user_info[0].(*tg.User)).LastName, " ошибка при приглашении в канал", e)
 		}
 
 		fmt.Println(res)
@@ -69,7 +70,7 @@ func invite_to_channel(ch *tg.InputChannel, us *tg.InputUser) bool {
 	}); err != nil {
 		panic(err)
 	}
-
-	fmt.Println((*user_info[0].(*tg.User)).FirstName, (*user_info[0].(*tg.User)).LastName, " успешно пригласил в канал")
+	fmt.Println("Успешно пригласил в канал")
+	//fmt.Println((*user_info[0].(*tg.User)).FirstName, (*user_info[0].(*tg.User)).LastName, " успешно пригласил в канал")
 	return true
 }

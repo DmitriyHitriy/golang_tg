@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"path/filepath"
 
@@ -51,16 +50,15 @@ func search_contact(query string, limit int) []*tg.Channel {
 			Limit: limit,
 		}
 
-		res, e := raw.ContactsSearch(ctx, &req)
-		
+		res, _ := raw.ContactsSearch(ctx, &req)
 
 		for _, chat := range (*res).Chats {
 			chats_results = append(chats_results, chat.(*tg.Channel))
-			fmt.Println(chat)
+			//fmt.Println(chat)
 		}
 
-		fmt.Println(res)
-		fmt.Println(e)
+		//fmt.Println(res)
+		//fmt.Println(e)
 
 		return err
 	}); err != nil {
