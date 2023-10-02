@@ -3,15 +3,46 @@ package main
 import (
 	"fmt"
 	//"os"
+	"path/filepath"
 	"time"
 
 	functions "golang_tg/cmd"
+	accs "golang_tg/internal/accounts"
+	cfg "golang_tg/internal/configs"
+
 	//parser "golang_tg/internal/channels"
 
 	"github.com/gotd/td/tg"
 )
 
 func main() {
+	// Читаем конфигурационный файл
+	// Без него паникуем
+	cfg := cfg.Configs{}
+	cfg.New()
+	fmt.Println(cfg)
+
+	// Собираем и чекаем аккаунты из папки accounts
+	// внутри папки с аккаунтами должны лежать папки внутри которых лежат tdata
+	// accounts - folder_x - tdata
+
+	accounts_dir, _ := filepath.Glob("accounts/*")
+	var work_accounts accs.Accounts
+
+	for _, acc_dir := range accounts_dir {
+		tdata_folder_path := filepath.Join(acc_dir, "tdata")
+
+		account := accs.Account{}
+
+		account.Constructor(tdata_folder_path)
+		if account.CheckAcc() {
+			work_accounts.AddAccount(&account)
+		}
+		account.CheckChannel()
+	}
+
+	// Проверяем есть ли у аккаунта созданный рекламный канал
+
 	//TGToolsGenerateChannel("Histórias incríveis de vitórias 💎", "🔥 Histórias coletadas do Brasil sobre vitórias incríveis de pessoas. Tente repetir suas histórias de sucesso. 💲", "casino.jpg")
 	//parser.Channel_parser_post("mom_blogtime", 10)
 
