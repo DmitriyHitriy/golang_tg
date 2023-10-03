@@ -26,7 +26,7 @@ func main() {
 	// внутри папки с аккаунтами должны лежать папки внутри которых лежат tdata
 	// accounts - folder_x - tdata
 
-	accounts_dir, _ := filepath.Glob("accounts/*")
+	accounts_dir, _ := filepath.Glob("tdatas/*")
 	var work_accounts accs.Accounts
 
 	for _, acc_dir := range accounts_dir {
