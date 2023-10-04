@@ -48,9 +48,11 @@ func main() {
 		}
 	}
 
-	// Проверяем есть ли у аккаунта созданный рекламный канал
+	// Собираем доноров со списка каналов input/channel_list
+	for _, account := range work_accounts.Accounts {
+		fmt.Println(account)
+	}
 
-	//TGToolsGenerateChannel("Histórias incríveis de vitórias 💎", "🔥 Histórias coletadas do Brasil sobre vitórias incríveis de pessoas. Tente repetir suas histórias de sucesso. 💲", "casino.jpg")
 	//parser.Channel_parser_post("mom_blogtime", 10)
 
 	//os.Exit(1)

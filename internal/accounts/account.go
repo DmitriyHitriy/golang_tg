@@ -63,6 +63,11 @@ func (a *Account) CheckAcc() bool {
 	if err := a.client.Run(a.ctx, func(ctx context.Context) error {
 		me, err := a.client.Self(ctx)
 		fmt.Println("Успешно авторизовались: ", me.FirstName, me.LastName)
+
+		a.SetFirstName(me.FirstName)
+		a.SetLastName(me.LastName)
+		a.SetUsername(me.Username)
+		a.SetPhone(me.Phone)
 		a.SetLastUse()
 		return err
 	}); err != nil {
