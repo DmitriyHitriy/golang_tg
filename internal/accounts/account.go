@@ -1,16 +1,20 @@
 package account
 
 import (
-	"context"
 	"fmt"
-	"path/filepath"
 	"time"
+	"strings"
+	"context"
+	"path/filepath"
 
 	"github.com/gookit/ini"
-	"github.com/gotd/td/session"
-	"github.com/gotd/td/session/tdesktop"
-	"github.com/gotd/td/telegram"
 	"github.com/gotd/td/tg"
+	"github.com/gotd/td/session"
+	"github.com/gotd/td/telegram"
+	"github.com/gotd/td/session/tdesktop"
+	"github.com/gotd/td/telegram/message"
+	
+	"github.com/goombaio/namegenerator"
 )
 
 type Account struct {
@@ -21,7 +25,7 @@ type Account struct {
 	tdata_path string
 	last_use   time.Time
 	client     *telegram.Client
-	channel    *tg.InputPeerChannel
+	channel    *tg.InputChannel
 	ctx        context.Context
 }
 
@@ -55,6 +59,7 @@ func (a *Account) Constructor(path string) {
 }
 
 func (a *Account) CheckAcc() bool {
+	fmt.Println(a.client)
 	if err := a.client.Run(a.ctx, func(ctx context.Context) error {
 		me, err := a.client.Self(ctx)
 		fmt.Println("Успешно авторизовались: ", me.FirstName, me.LastName)
@@ -68,11 +73,79 @@ func (a *Account) CheckAcc() bool {
 	return true
 }
 
+func (a *Account) Createchannel(name string, about string, photo_path string) bool {
+	if err := a.client.Run(a.ctx, func(ctx context.Context) error {
+		raw := tg.NewClient(a.client)
+
+		// Создаем канал
+		req_create_channel := tg.ChannelsCreateChannelRequest{
+			Title:     name,
+			About:     about,
+			Broadcast: true,
+			Megagroup: false,
+		}
+	
+		res_create_channel, err := raw.ChannelsCreateChannel(ctx, &req_create_channel)
+		channel := ((*res_create_channel.(*tg.Updates)).Chats[0]).(*tg.Channel)
+	
+		ch_input := tg.InputChannel{ChannelID:  channel.ID,AccessHash: channel.AccessHash}
+		
+		a.SetChannel(&ch_input)
+
+		// Генерируем имя канала и назначаем его каналу
+		var channel_username string
+		for {
+			tmp_channel_username := a.generateUsername()
+			req_update_username := tg.ChannelsUpdateUsernameRequest{
+				Channel:  &ch_input,
+				Username: tmp_channel_username,
+			}
+
+			res_update_username, _ := raw.ChannelsUpdateUsername(a.ctx, &req_update_username)
+
+			if res_update_username {
+				channel_username = tmp_channel_username
+				break
+			}
+		}
+
+		// Устанавливаем аватарку каналу
+		nm, _ := message.NewSender(raw).Resolve(channel_username).Upload(message.Upload(func(ctx context.Context, b message.Uploader) (tg.InputFileClass, error) {
+			r, err := b.FromPath(ctx, photo_path)
+			if err != nil {
+				return nil, err
+			}
+	
+			return r, nil
+		})).Photo(a.ctx)
+	
+		photo := (*(*(*(*(*nm.(*tg.Updates)).Updates[2].(*tg.UpdateNewChannelMessage)).Message.(*tg.Message)).Media.(*tg.MessageMediaPhoto)).Photo.(*tg.Photo))
+	
+		// Ставим загруженное фото на аватарку
+		in_photo := tg.InputPhoto{ID: photo.ID, AccessHash: photo.AccessHash, FileReference: photo.FileReference}
+		chat_photo := tg.InputChatPhoto{ID: &in_photo}
+	
+		req_edit_photo := tg.ChannelsEditPhotoRequest{
+			Channel: &ch_input,
+			Photo:   &chat_photo,
+		}
+	
+		raw.ChannelsEditPhoto(a.ctx, &req_edit_photo)
+
+		return err
+	}); err != nil {
+		panic(err)
+	}
+
+	return true
+	
+}
+
 func (a *Account) GetClient() *telegram.Client {
 	return a.client
 }
 
-func (a *Account) GetChannel() *tg.InputPeerChannel {
+func (a *Account) GetChannel() *tg.InputChannel {
 	return a.channel
 }
 
@@ -104,7 +177,7 @@ func (a *Account) SetClient(client *telegram.Client) {
 	a.client = client
 }
 
-func (a *Account) SetChannel(channel *tg.InputPeerChannel) {
+func (a *Account) SetChannel(channel *tg.InputChannel) {
 	a.channel = channel
 }
 
@@ -153,8 +226,17 @@ func (a *Account) CheckChannel() bool {
 	channel_id, _ := cfg_channel.Int("channel_id")
 	channel_accesshash, _ := cfg_channel.Int("channel_access_hash")
 
-	input_peer := &tg.InputPeerChannel{ChannelID: int64(channel_id), AccessHash: int64(channel_accesshash)}
+	input_peer := &tg.InputChannel{ChannelID: int64(channel_id), AccessHash: int64(channel_accesshash)}
 	a.SetChannel(input_peer)
 
 	return true
+}
+
+func (a *Account) generateUsername() string {
+	seed := time.Now().UTC().UnixNano()
+	nameGenerator := namegenerator.NewNameGenerator(seed)
+
+	name := strings.ReplaceAll(nameGenerator.Generate()+"_bratkov", "-", "_")
+
+	return name
 }

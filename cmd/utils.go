@@ -1,8 +1,8 @@
-package functions
+package utils
 
 import (
-	"bufio"
 	"os"
+	"bufio"
 )
 
 func Get_rows_in_file(filename string) ([]string, error) {

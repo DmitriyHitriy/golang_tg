@@ -35,10 +35,14 @@ func main() {
 		account := accs.Account{}
 
 		account.Constructor(tdata_folder_path)
+		// Проверяем, живой ли аккаунт
 		if account.CheckAcc() {
 			work_accounts.AddAccount(&account)
 		}
-		account.CheckChannel()
+		// Проверяем есть ли у аккаунта созданный рекламмный канал
+		if account.CheckChannel() {
+			fmt.Println("dd")
+		}
 	}
 
 	// Проверяем есть ли у аккаунта созданный рекламный канал
