@@ -38,10 +38,13 @@ func main() {
 		// Проверяем, живой ли аккаунт
 		if account.CheckAcc() {
 			work_accounts.AddAccount(&account)
+
 		}
 		// Проверяем есть ли у аккаунта созданный рекламмный канал
-		if account.CheckChannel() {
-			fmt.Println("dd")
+		if !account.CheckChannel() {
+			fmt.Println("Канал не обнаружен. Создаем его.")
+			account.Constructor(tdata_folder_path)
+			account.Createchannel(cfg.GetChannelName(), cfg.GetChannelDesc(), cfg.GetChannelPhoto())
 		}
 	}
 

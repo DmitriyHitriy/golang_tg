@@ -1,19 +1,19 @@
 package account
 
 import (
-	"fmt"
-	"time"
-	"strings"
 	"context"
+	"fmt"
 	"path/filepath"
+	"strings"
+	"time"
 
 	"github.com/gookit/ini"
-	"github.com/gotd/td/tg"
 	"github.com/gotd/td/session"
-	"github.com/gotd/td/telegram"
 	"github.com/gotd/td/session/tdesktop"
+	"github.com/gotd/td/telegram"
 	"github.com/gotd/td/telegram/message"
-	
+	"github.com/gotd/td/tg"
+
 	"github.com/goombaio/namegenerator"
 )
 
@@ -59,7 +59,7 @@ func (a *Account) Constructor(path string) {
 }
 
 func (a *Account) CheckAcc() bool {
-	fmt.Println(a.client)
+
 	if err := a.client.Run(a.ctx, func(ctx context.Context) error {
 		me, err := a.client.Self(ctx)
 		fmt.Println("Успешно авторизовались: ", me.FirstName, me.LastName)
@@ -74,7 +74,8 @@ func (a *Account) CheckAcc() bool {
 }
 
 func (a *Account) Createchannel(name string, about string, photo_path string) bool {
-	if err := a.client.Run(a.ctx, func(ctx context.Context) error {
+	ctx := context.Background()
+	if err := a.client.Run(ctx, func(ctx context.Context) error {
 		raw := tg.NewClient(a.client)
 
 		// Создаем канал
@@ -84,12 +85,12 @@ func (a *Account) Createchannel(name string, about string, photo_path string) bo
 			Broadcast: true,
 			Megagroup: false,
 		}
-	
+
 		res_create_channel, err := raw.ChannelsCreateChannel(ctx, &req_create_channel)
 		channel := ((*res_create_channel.(*tg.Updates)).Chats[0]).(*tg.Channel)
-	
-		ch_input := tg.InputChannel{ChannelID:  channel.ID,AccessHash: channel.AccessHash}
-		
+
+		ch_input := tg.InputChannel{ChannelID: channel.ID, AccessHash: channel.AccessHash}
+
 		a.SetChannel(&ch_input)
 
 		// Генерируем имя канала и назначаем его каналу
@@ -101,7 +102,7 @@ func (a *Account) Createchannel(name string, about string, photo_path string) bo
 				Username: tmp_channel_username,
 			}
 
-			res_update_username, _ := raw.ChannelsUpdateUsername(a.ctx, &req_update_username)
+			res_update_username, _ := raw.ChannelsUpdateUsername(ctx, &req_update_username)
 
 			if res_update_username {
 				channel_username = tmp_channel_username
@@ -115,30 +116,30 @@ func (a *Account) Createchannel(name string, about string, photo_path string) bo
 			if err != nil {
 				return nil, err
 			}
-	
+
 			return r, nil
-		})).Photo(a.ctx)
-	
+		})).Photo(ctx)
+
 		photo := (*(*(*(*(*nm.(*tg.Updates)).Updates[2].(*tg.UpdateNewChannelMessage)).Message.(*tg.Message)).Media.(*tg.MessageMediaPhoto)).Photo.(*tg.Photo))
-	
+
 		// Ставим загруженное фото на аватарку
 		in_photo := tg.InputPhoto{ID: photo.ID, AccessHash: photo.AccessHash, FileReference: photo.FileReference}
 		chat_photo := tg.InputChatPhoto{ID: &in_photo}
-	
+
 		req_edit_photo := tg.ChannelsEditPhotoRequest{
 			Channel: &ch_input,
 			Photo:   &chat_photo,
 		}
-	
-		raw.ChannelsEditPhoto(a.ctx, &req_edit_photo)
 
+		raw.ChannelsEditPhoto(ctx, &req_edit_photo)
+		a.createConfigChannel()
 		return err
 	}); err != nil {
 		panic(err)
 	}
 
 	return true
-	
+
 }
 
 func (a *Account) GetClient() *telegram.Client {
@@ -230,6 +231,17 @@ func (a *Account) CheckChannel() bool {
 	a.SetChannel(input_peer)
 
 	return true
+}
+
+func (a *Account) createConfigChannel() {
+	cfg_path := filepath.Join(a.GetTDataPath(), "channel.ini")
+	cfg_channel, _ := ini.LoadExists(cfg_path)
+	input_channel := a.GetChannel()
+
+	cfg_channel.SetInt("channel_id", int(input_channel.GetChannelID()))
+	cfg_channel.SetInt("channel_access_hash", int(input_channel.GetAccessHash()))
+
+	cfg_channel.WriteToFile(cfg_path)
 }
 
 func (a *Account) generateUsername() string {
