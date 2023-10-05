@@ -29,6 +29,10 @@ type Account struct {
 	ctx        context.Context
 }
 
+func (a *Account) Connect() {
+	a.Constructor(a.GetTDataPath())
+}
+
 func (a *Account) Constructor(path string) {
 	ctx := context.Background()
 	a.ctx = ctx
@@ -76,6 +80,7 @@ func (a *Account) CheckAcc() bool {
 	}
 
 	return true
+
 }
 
 func (a *Account) Createchannel(name string, about string, photo_path string) bool {
@@ -177,6 +182,10 @@ func (a *Account) GetTDataPath() string {
 
 func (a *Account) GetLastUse() time.Time {
 	return a.last_use
+}
+
+func (a *Account) GetContext() *context.Context {
+	return &a.ctx
 }
 
 func (a *Account) SetClient(client *telegram.Client) {

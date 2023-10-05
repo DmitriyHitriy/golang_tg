@@ -9,6 +9,7 @@ import (
 	functions "golang_tg/cmd"
 	accs "golang_tg/internal/accounts"
 	cfg "golang_tg/internal/configs"
+	donors "golang_tg/internal/donors"
 
 	//parser "golang_tg/internal/channels"
 
@@ -50,12 +51,13 @@ func main() {
 
 	// Собираем доноров со списка каналов input/channel_list
 	for _, account := range work_accounts.Accounts {
-		fmt.Println(account)
+
+		donor := donors.Donor{Account: account}
+		donor.DonorGetUsers()
+		fmt.Println(donor)
 	}
 
-	//parser.Channel_parser_post("mom_blogtime", 10)
 
-	//os.Exit(1)
 	var channels_donor []*tg.Channel
 	var users_donor []*tg.User
 
@@ -77,7 +79,7 @@ func main() {
 	for _, tg_channel := range channels_donor {
 		users_in_channel := get_users_in_messages_from_channel(tg_channel.ID, tg_channel.AccessHash)
 		for _, user := range users_in_channel {
-			if !elementExists(users_donor, user.ID) {
+			if !elementExists(users_donor, user.ID) && !user.Bot {
 				users_donor = append(users_donor, user)
 			}
 		}
