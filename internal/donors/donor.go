@@ -7,16 +7,17 @@ import (
 
 	"github.com/gotd/td/tg"
 
-	"golang_tg/internal/accounts"
+	account "golang_tg/internal/accounts"
 )
 
 type Donor struct {
-	Account     *account.Account
-	Users []*tg.User
+	Account *account.Account
+	Users   []*tg.User
 }
 
 func (d *Donor) DonorSetUsers(users []*tg.User) {
 	d.Users = users
+
 }
 
 func (d *Donor) DonorGetUsers() []*tg.User {
@@ -40,7 +41,7 @@ func (d *Donor) DonorGetUsers() []*tg.User {
 			if tg_channel.Megagroup && participants_count > 100 {
 				channels = append(channels, tg_channel)
 			}
-		} 
+		}
 	}
 
 	for _, channel := range channels {
@@ -54,6 +55,7 @@ func (d *Donor) DonorGetUsers() []*tg.User {
 	}
 
 	d.DonorSetUsers(users)
+	d.Account.SetUsers(users)
 
 	return users
 
@@ -87,8 +89,8 @@ func (d *Donor) donorSearchUsersFromMessagesChannel(tg_channel *tg.Channel) []*t
 					if user.((*tg.User)).Bot {
 						continue
 					}
-					users = append(users,  user.((*tg.User)))
-					
+					users = append(users, user.((*tg.User)))
+
 					// if elementExists(users, user.((*tg.User)).ID) == false {
 					// 	users = append(users, user.((*tg.User)))
 					// }

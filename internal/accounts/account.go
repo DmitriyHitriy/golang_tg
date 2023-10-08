@@ -1,12 +1,16 @@
 package account
 
 import (
+    "os"
+    "fmt"
+    "time"
+    "bufio"
+    "strconv"
+    "strings"
 	"context"
-	"fmt"
+	"math/rand"
 	"path/filepath"
-	"strings"
-	"time"
-
+	
 	"github.com/gookit/ini"
 	"github.com/gotd/td/session"
 	"github.com/gotd/td/session/tdesktop"
@@ -14,7 +18,10 @@ import (
 	"github.com/gotd/td/telegram/message"
 	"github.com/gotd/td/tg"
 
+    "golang.org/x/exp/slices"
 	"github.com/goombaio/namegenerator"
+
+    channel "golang_tg/internal/channels"
 )
 
 type Account struct {
@@ -26,6 +33,8 @@ type Account struct {
 	last_use   time.Time
 	client     *telegram.Client
 	channel    *tg.InputChannel
+    Input_channel channel.Channel
+	users      []*tg.User
 	ctx        context.Context
 }
 
@@ -188,6 +197,33 @@ func (a *Account) GetContext() *context.Context {
 	return &a.ctx
 }
 
+func (a *Account) GetUsers() []*tg.User {
+	return a.users
+}
+
+func (a *Account) GetUserNext() *tg.User {
+    for {
+        if len(a.GetUsers()) == 0 {
+            return nil
+        }
+    
+        index := rand.Intn(len(a.GetUsers()))
+        user := a.GetUsers()[index]
+    
+        new_user_list := a.GetUsers()
+    
+        new_user_list = slices.Delete(new_user_list, index, index + 1)
+    
+        a.SetUsers(new_user_list)
+    
+        global_invited_users := a.readGlobalInvitedUsers()
+        if !a.isGlobalInvitedUsers(global_invited_users, int(user.ID)) {
+            a.addGlobalInvitedUsers(int(user.ID))
+            return user
+        }
+    }
+}
+
 func (a *Account) SetClient(client *telegram.Client) {
 	a.client = client
 }
@@ -218,6 +254,10 @@ func (a *Account) SetTDataPath(tdata_path string) {
 
 func (a *Account) SetLastUse() {
 	a.last_use = time.Now()
+}
+
+func (a *Account) SetUsers(users []*tg.User) {
+	a.users = users
 }
 
 func NewAccount(first_name string, last_name string, username string, phone string, tdata_path string) *Account {
@@ -265,4 +305,43 @@ func (a *Account) generateUsername() string {
 	name := strings.ReplaceAll(nameGenerator.Generate()+"_bratkov", "-", "_")
 
 	return name
+}
+
+func (a *Account) readGlobalInvitedUsers() []string {
+    id_users := make([]string, 0)
+
+    f, e := os.Open("global_invited_users")
+    if e != nil {
+        a.writeGlobalInvitedUsers()
+        return id_users
+    }
+    
+    defer f.Close()
+
+    buf := bufio.NewScanner(f)
+
+	for buf.Scan() {
+		id_users = append(id_users, buf.Text())
+	}
+
+    return id_users
+}
+
+func (a *Account) writeGlobalInvitedUsers() {
+    var data []byte
+    os.WriteFile("global_invited_users", data, 0700)
+}
+
+func (a *Account) addGlobalInvitedUsers(id int) {
+    f, _ := os.OpenFile("global_invited_users", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
+    f.WriteString(strconv.Itoa(id) + "\n")
+}
+
+func (a *Account) isGlobalInvitedUsers(haystack []string, id int) bool {
+    for _, v := range haystack {
+		if v == strconv.Itoa(id) {
+			return true
+		}
+	}
+	return false
 }

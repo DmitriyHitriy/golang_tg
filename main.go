@@ -6,14 +6,9 @@ import (
 	"path/filepath"
 	"time"
 
-	functions "golang_tg/cmd"
 	accs "golang_tg/internal/accounts"
 	cfg "golang_tg/internal/configs"
 	donors "golang_tg/internal/donors"
-
-	//parser "golang_tg/internal/channels"
-
-	"github.com/gotd/td/tg"
 )
 
 func main() {
@@ -51,52 +46,19 @@ func main() {
 
 	// Собираем доноров со списка каналов input/channel_list
 	for _, account := range work_accounts.Accounts {
-
 		donor := donors.Donor{Account: account}
 		donor.DonorGetUsers()
-		fmt.Println(donor)
 	}
 
-
-	var channels_donor []*tg.Channel
-	var users_donor []*tg.User
-
-	channel_list, _ := functions.Get_rows_in_file("input/channel_list")
-
-	for _, tg_channel := range channel_list {
-		channels_result := search_contact(tg_channel, 10)
-
-		for _, channel := range channels_result {
-			participants_count, _ := channel.GetParticipantsCount()
-
-			if channel.Megagroup && participants_count > 100 {
-				fmt.Println(channel.Title, channel.ParticipantsCount)
-				channels_donor = append(channels_donor, channel)
-			}
+	// Инвайтим юзеров
+	for {
+		for _, account := range work_accounts.Accounts {
+			us := account.GetUserNext()
+			account.Connect()
+			account.Input_channel.InviteToChannel(*account.GetContext(), account.GetClient(), account.GetChannel(), us)
+			time.Sleep(5 * time.Second)
 		}
-	}
 
-	for _, tg_channel := range channels_donor {
-		users_in_channel := get_users_in_messages_from_channel(tg_channel.ID, tg_channel.AccessHash)
-		for _, user := range users_in_channel {
-			if !elementExists(users_donor, user.ID) && !user.Bot {
-				users_donor = append(users_donor, user)
-			}
-		}
-	}
-
-	for i, user := range users_donor {
-		if i <= 50 {
-			ch_input := &tg.InputChannel{ChannelID: 1941890406, AccessHash: 5678437962803547359}
-			us_unput := &tg.InputUser{UserID: user.ID, AccessHash: user.AccessHash}
-			res_invite := invite_to_channel(ch_input, us_unput)
-
-			if res_invite {
-				time.Sleep(20 * time.Second)
-			}
-		} else {
-			fmt.Println("Исчерпан лимит инвайта")
-			break
-		}
+		time.Sleep(60 * time.Second)
 	}
 }
