@@ -6,6 +6,7 @@ import (
 
 	"github.com/gotd/td/tg"
 	"github.com/gotd/td/telegram"
+	"github.com/gotd/td/telegram/message"
 )
 
 type Channel struct {
@@ -44,4 +45,45 @@ func (c *Channel) InviteToChannel(ctx context.Context, client *telegram.Client, 
 	}); err != nil {
 		fmt.Println("Ошибка добавления в канал ", err)
 	}
+
+}
+
+func (c *Channel) CreatePost(ctx context.Context, client *telegram.Client, channel *tg.InputChannel) {
+
+}
+
+// TODO: Написать нормальный обработчик получения информации
+func (c *Channel) GetChannelInfo(ctx context.Context, client *telegram.Client, channel *tg.InputChannel){
+	if err := client.Run(ctx, func(ctx context.Context) error {
+		var err error
+		raw := tg.NewClient(client)
+		
+		// req := tg.ChannelsGetChannelsRequest{
+		// 	ID: []tg.InputChannelClass{channel},
+		// }
+
+		res, e := raw.ChannelsGetChannels(ctx, []tg.InputChannelClass{channel})
+
+		fmt.Println(res)
+		fmt.Println(e)
+		return err
+	}); err != nil {
+		panic(err)
+	}
+}
+
+func (c *Channel) ChannelSendMessage(ctx context.Context, client *telegram.Client, channel string) {
+	if err := client.Run(ctx, func(ctx context.Context) error {
+		var err error
+		raw := tg.NewClient(client)
+
+		sender, _ := message.NewSender(raw).Resolve("morning_dew_bratkov").Text(ctx, "Hello!!!")
+
+		fmt.Println(sender)
+
+		return err
+	}); err != nil {
+		panic(err)
+	}
+	
 }

@@ -46,6 +46,10 @@ func main() {
 
 	// Собираем доноров со списка каналов input/channel_list
 	for _, account := range work_accounts.Accounts {
+		account.Connect()
+		account.Input_channel.GetChannelInfo(*account.GetContext(), account.GetClient(), account.GetChannel())
+		account.Connect()
+		account.Input_channel.ChannelSendMessage(*account.GetContext(), account.GetClient(), "morning_dew_bratkov")
 		donor := donors.Donor{Account: account}
 		donor.DonorGetUsers()
 	}
