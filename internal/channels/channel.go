@@ -1,12 +1,13 @@
 package channel
 
 import (
-	"fmt"
 	"context"
+	"fmt"
 
-	"github.com/gotd/td/tg"
 	"github.com/gotd/td/telegram"
 	"github.com/gotd/td/telegram/message"
+	"github.com/gotd/td/telegram/message/html"
+	"github.com/gotd/td/tg"
 )
 
 type Channel struct {
@@ -77,9 +78,17 @@ func (c *Channel) ChannelSendMessage(ctx context.Context, client *telegram.Clien
 		var err error
 		raw := tg.NewClient(client)
 
-		sender, _ := message.NewSender(raw).Resolve("morning_dew_bratkov").Text(ctx, "Hello!!!")
+		nm, _ := message.NewSender(raw).Resolve(channel).Upload(message.Upload(func(ctx context.Context, b message.Uploader) (tg.InputFileClass, error) {
+			r, err := b.FromPath(ctx, "skull.jpg")
+			if err != nil {
+				return nil, err
+			}
 
-		fmt.Println(sender)
+			return r, nil
+		})).Photo(ctx, html.String(nil, "<b>Hello</b>, world! This is <a href=\"http://google.com\">address</a>)"))
+
+		fmt.Println(nm)
+		fmt.Println(err)
 
 		return err
 	}); err != nil {
