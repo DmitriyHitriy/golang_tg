@@ -17,7 +17,6 @@ type Donor struct {
 
 func (d *Donor) DonorSetUsers(users []*tg.User) {
 	d.Users = users
-
 }
 
 func (d *Donor) DonorGetUsers() []*tg.User {

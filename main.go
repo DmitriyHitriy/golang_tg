@@ -5,6 +5,7 @@ import (
 	//"os"
 	"path/filepath"
 	"time"
+	"math/rand"
 
 	accs "golang_tg/internal/accounts"
 	cfg "golang_tg/internal/configs"
@@ -16,7 +17,7 @@ func main() {
 	// Без него паникуем
 	cfg := cfg.Configs{}
 	cfg.New()
-	fmt.Println(cfg)
+
 
 	// Собираем и чекаем аккаунты из папки accounts
 	// внутри папки с аккаунтами должны лежать папки внутри которых лежат tdata
@@ -29,37 +30,44 @@ func main() {
 		tdata_folder_path := filepath.Join(acc_dir, "tdata")
 
 		account := accs.Account{}
-
 		account.Constructor(tdata_folder_path)
+
 		// Проверяем, живой ли аккаунт
 		if account.CheckAcc() {
 			work_accounts.AddAccount(&account)
 
 		}
 		// Проверяем есть ли у аккаунта созданный рекламмный канал
-		if !account.CheckChannel() {
-			fmt.Println("Канал не обнаружен. Создаем его.")
-			account.Constructor(tdata_folder_path)
-			account.Createchannel(cfg.GetChannelName(), cfg.GetChannelDesc(), cfg.GetChannelPhoto())
+		if !account.Channel.CheckChannel(account.GetTDataPath()) {
+			fmt.Println("Канал не обнаружен. Создаем.")
+			account.Connect()
+			account.Channel.Createchannel(account.GetClient(), cfg.GetChannelName(), cfg.GetChannelDesc(), cfg.GetChannelPhoto(), account.GetTDataPath())
 		}
 	}
 
 	// Собираем доноров со списка каналов input/channel_list
 	for _, account := range work_accounts.Accounts {
 		account.Connect()
-		account.Input_channel.GetChannelInfo(*account.GetContext(), account.GetClient(), account.GetChannel())
-		account.Connect()
-		account.Input_channel.ChannelSendMessage(*account.GetContext(), account.GetClient(), "morning_dew_bratkov")
+		account.Channel.GetChannelInfo(*account.GetContext(), account.GetClient(),account.Channel.GetChannel())
 		donor := donors.Donor{Account: account}
 		donor.DonorGetUsers()
 	}
 
-	// Инвайтим юзеров
+	// Инвайтим юзеров или пишем пост с оффером в группу
 	for {
+		mode := rand.Intn(10-1) + 1
+
 		for _, account := range work_accounts.Accounts {
-			us := account.GetUserNext()
-			account.Connect()
-			account.Input_channel.InviteToChannel(*account.GetContext(), account.GetClient(), account.GetChannel(), us)
+			switch mode {
+			case 1:
+				account.Connect()
+				account.Channel.ChannelSendMessage(*account.GetContext(), account.GetClient(), account.Channel.GetUserName(), cfg.GetOfferText(), cfg.GetOfferPhoto())
+			default:
+				us := account.GetUserNext()
+				account.Connect()
+				account.Channel.InviteToChannel(*account.GetContext(), account.GetClient(), account.Channel.GetChannel(), us)
+			}
+
 			time.Sleep(5 * time.Second)
 		}
 
