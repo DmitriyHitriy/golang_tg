@@ -55,7 +55,7 @@ func main() {
 
 	// Инвайтим юзеров или пишем пост с оффером в группу
 	for {
-		mode := rand.Intn(10-1) + 1
+		mode := rand.Intn(20-1) + 1
 
 		for _, account := range work_accounts.Accounts {
 			switch mode {
@@ -71,6 +71,7 @@ func main() {
 			time.Sleep(5 * time.Second)
 		}
 
-		time.Sleep(60 * time.Second)
+		time.Sleep(600 * time.Second)
 	}
+	fmt.Println("Закончили работу")
 }
