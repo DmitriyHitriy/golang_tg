@@ -51,6 +51,11 @@ func main() {
 		account.Channel.GetChannelInfo(*account.GetContext(), account.GetClient(),account.Channel.GetChannel())
 		donor := donors.Donor{Account: account}
 		donor.DonorGetUsers()
+		donor.DonorGetPosts()
+		p := donor.Account.GetPostNext()
+		account.Connect()
+		account.Channel.CreatePost(*account.GetContext(), account.GetClient(), account.Channel.GetUserName(), p)
+		fmt.Println(p)
 	}
 
 	// Инвайтим юзеров или пишем пост с оффером в группу
@@ -58,20 +63,27 @@ func main() {
 		mode := rand.Intn(20-1) + 1
 
 		for _, account := range work_accounts.Accounts {
-			switch mode {
-			case 1:
+			switch {
+			case mode == 1:
 				account.Connect()
 				account.Channel.ChannelSendMessage(*account.GetContext(), account.GetClient(), account.Channel.GetUserName(), cfg.GetOfferText(), cfg.GetOfferPhoto())
+				fmt.Println("Разместили рекламный оффер")
+			case mode > 1 && mode <= 8:
+				account.Connect()
+				post := account.GetPostNext()
+				account.Channel.CreatePost(*account.GetContext(), account.GetClient(), account.Channel.GetUserName(), post)
+				fmt.Println("Разместили пост")
 			default:
 				us := account.GetUserNext()
 				account.Connect()
 				account.Channel.InviteToChannel(*account.GetContext(), account.GetClient(), account.Channel.GetChannel(), us)
+				fmt.Println("Добавили человека в группу")
 			}
 
 			time.Sleep(5 * time.Second)
 		}
 
-		time.Sleep(600 * time.Second)
+		time.Sleep(300 * time.Second)
 	}
 	fmt.Println("Закончили работу")
 }

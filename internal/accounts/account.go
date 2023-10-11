@@ -28,6 +28,7 @@ type Account struct {
 	last_use   time.Time
 	client     *telegram.Client
 	users      []*tg.User
+	posts      []*tg.Message
 	ctx        context.Context
 	Channel    channel.Channel
 }
@@ -122,6 +123,10 @@ func (a *Account) GetUsers() []*tg.User {
 	return a.users
 }
 
+func (a *Account) GetPosts() []*tg.Message {
+    return a.posts
+}
+
 func (a *Account) GetUserNext() *tg.User {
 	for {
 		if len(a.GetUsers()) == 0 {
@@ -137,10 +142,35 @@ func (a *Account) GetUserNext() *tg.User {
 
 		a.SetUsers(new_user_list)
 
-		global_invited_users := a.readGlobalInvitedUsers()
-		if !a.isGlobalInvitedUsers(global_invited_users, int(user.ID)) {
-			a.addGlobalInvitedUsers(int(user.ID))
+		global_invited_users := a.readGlobalUsesDonor()
+        
+		if !a.isGlobalUsesDonor(global_invited_users, int(user.ID)) {
+			a.addGlobalUsesDonor(int(user.ID))
 			return user
+		}
+	}
+}
+
+func (a *Account) GetPostNext() *tg.Message {
+	for {
+		if len(a.GetPosts()) == 0 {
+			return nil
+		}
+
+		index := rand.Intn(len(a.GetPosts()))
+		post := a.GetPosts()[index]
+
+		new_post_list := a.GetPosts()
+
+		new_post_list = slices.Delete(new_post_list, index, index+1)
+
+		a.SetPosts(new_post_list)
+
+		global_used_posts := a.readGlobalUsesDonor()
+        id_post, _ := strconv.Atoi(strconv.Itoa(post.Date) + strconv.Itoa(post.ID))
+		if !a.isGlobalUsesDonor(global_used_posts, id_post) {
+			a.addGlobalUsesDonor(id_post)
+			return post
 		}
 	}
 }
@@ -177,13 +207,17 @@ func (a *Account) SetUsers(users []*tg.User) {
 	a.users = users
 }
 
-func (a *Account) readGlobalInvitedUsers() []string {
-	id_users := make([]string, 0)
+func (a *Account) SetPosts(posts []*tg.Message) {
+	a.posts = posts
+}
 
-	f, e := os.Open("global_invited_users")
+func (a *Account) readGlobalUsesDonor() []string {
+	ids := make([]string, 0)
+
+	f, e := os.Open("global_uses_donor")
 	if e != nil {
-		a.writeGlobalInvitedUsers()
-		return id_users
+		a.writeGlobalUsesDonor()
+		return ids
 	}
 
 	defer f.Close()
@@ -191,23 +225,23 @@ func (a *Account) readGlobalInvitedUsers() []string {
 	buf := bufio.NewScanner(f)
 
 	for buf.Scan() {
-		id_users = append(id_users, buf.Text())
+		ids = append(ids, buf.Text())
 	}
 
-	return id_users
+	return ids
 }
 
-func (a *Account) writeGlobalInvitedUsers() {
+func (a *Account) writeGlobalUsesDonor() {
 	var data []byte
-	os.WriteFile("global_invited_users", data, 0700)
+	os.WriteFile("global_uses_donor", data, 0700)
 }
 
-func (a *Account) addGlobalInvitedUsers(id int) {
-	f, _ := os.OpenFile("global_invited_users", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
+func (a *Account) addGlobalUsesDonor(id int) {
+	f, _ := os.OpenFile("global_uses_donor", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
 	f.WriteString(strconv.Itoa(id) + "\n")
 }
 
-func (a *Account) isGlobalInvitedUsers(haystack []string, id int) bool {
+func (a *Account) isGlobalUsesDonor(haystack []string, id int) bool {
 	for _, v := range haystack {
 		if v == strconv.Itoa(id) {
 			return true

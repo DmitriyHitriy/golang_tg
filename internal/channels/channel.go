@@ -99,8 +99,30 @@ func (c *Channel) InviteToChannel(ctx context.Context, client *telegram.Client, 
 
 }
 
-func (c *Channel) CreatePost(ctx context.Context, client *telegram.Client, channel *tg.InputChannel) {
+func (c *Channel) CreatePost(ctx context.Context, client *telegram.Client, channel string, post *tg.Message) {
+	if err := client.Run(ctx, func(ctx context.Context) error {
+		var err error
+		raw := tg.NewClient(client)
 
+		if post.Media.TypeName() == "messageMediaPhoto" {
+			media := post.Media.(*tg.MessageMediaPhoto)
+			photo, _ := media.GetPhoto()
+			originPhoto := photo.(*tg.Photo)
+			photo_file_location := tg.InputPhotoFileLocation{
+				ID: originPhoto.GetID(),
+				AccessHash: originPhoto.GetAccessHash(),
+				FileReference: originPhoto.GetFileReference(),
+				ThumbSize: "500",
+			}
+
+		message.NewSender(raw).Resolve(channel).Photo(ctx, &photo_file_location, html.String(nil, post.Message))
+		}
+		
+
+		return err
+	}); err != nil {
+		panic(err)
+	}
 }
 
 func (c *Channel) GetChannelInfo(ctx context.Context, client *telegram.Client, channel *tg.InputChannel){
@@ -127,7 +149,7 @@ func (c *Channel) ChannelSendMessage(ctx context.Context, client *telegram.Clien
 	if err := client.Run(ctx, func(ctx context.Context) error {
 		var err error
 		raw := tg.NewClient(client)
-
+		
 		nm, _ := message.NewSender(raw).Resolve(channel).Upload(message.Upload(func(ctx context.Context, b message.Uploader) (tg.InputFileClass, error) {
 			r, err := b.FromPath(ctx, photo)
 			if err != nil {
