@@ -3,16 +3,16 @@ package channel
 import (
 	"context"
 	"fmt"
-	"time"
-	"strings"
 	"path/filepath"
+	"strings"
+	"time"
 
+	"github.com/gookit/ini"
+	"github.com/goombaio/namegenerator"
 	"github.com/gotd/td/telegram"
 	"github.com/gotd/td/telegram/message"
 	"github.com/gotd/td/telegram/message/html"
 	"github.com/gotd/td/tg"
-	"github.com/goombaio/namegenerator"
-	"github.com/gookit/ini"
 )
 
 type Channel struct {
@@ -72,8 +72,8 @@ func (c *Channel) SetParticipantsCount(participants_count int) {
 	c.ParticipantsCount = participants_count
 }
 
-func (c *Channel) InviteToChannel(ctx context.Context, client *telegram.Client, channel *tg.InputChannel, user *tg.User) {
-	if err := client.Run(ctx, func(ctx context.Context) error {
+func (c *Channel) InviteToChannel(ctx context.Context, client *telegram.Client, channel *tg.InputChannel, user *tg.User) (bool, error) {
+	err := client.Run(ctx, func(ctx context.Context) error {
 		raw := tg.NewClient(client)
 
 		us := &tg.InputUser{UserID: user.GetID(), AccessHash: user.AccessHash}
@@ -85,11 +85,13 @@ func (c *Channel) InviteToChannel(ctx context.Context, client *telegram.Client, 
 
 		_, e := raw.ChannelsInviteToChannel(ctx, &req)
 
-		fmt.Println(e)
-
 		return e
-	}); err != nil {
-		fmt.Println("Ошибка добавления в канал ", err)
+	}) 
+
+	if err == nil {
+		return true, nil
+	} else {
+		return false, err
 	}
 
 }

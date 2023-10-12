@@ -154,37 +154,37 @@ func (d *Donor) donorGetPostsChannel(tg_channel *tg.Channel) []*tg.Message {
 		raw := tg.NewClient(d.Account.GetClient())
 
 		ch := &tg.InputPeerChannel{ChannelID: tg_channel.AsInput().ChannelID, AccessHash: tg_channel.AsInput().AccessHash}
+		
 		var offset int
+		date_last_message := int(time.Now().Unix())
+		current_date := int(time.Now().Unix())
 
-		for {
-			if len(posts) <= 50 {
-				req_message_history := tg.MessagesGetHistoryRequest{
-					Peer:      ch,
-					Limit:     100,
-					AddOffset: offset,
-				}
+		for current_date - date_last_message < 60 * 60 * 24 {
+			req_message_history := tg.MessagesGetHistoryRequest{
+				Peer:      ch,
+				Limit:     100,
+				AddOffset: offset,
+			}
 
-				res_message_history, err := raw.MessagesGetHistory(ctx, &req_message_history)
-				if err != nil {
-					break
-				}
-				messages := (*res_message_history.(*tg.MessagesChannelMessages)).Messages
+			res_message_history, err := raw.MessagesGetHistory(ctx, &req_message_history)
+			if err != nil {
+				break
+			}
+			messages := (*res_message_history.(*tg.MessagesChannelMessages)).Messages
 
-				for _, message := range messages {
-				
-					if message.TypeName() == "message" {
-						if message.((*tg.Message)).GroupedID == 0 && (int(time.Now().Unix()) - message.((*tg.Message)).Date) < 60 * 60 * 48 {
-							posts = append(posts, message.((*tg.Message)))
-						}
+			for _, message := range messages {
+			
+				if message.TypeName() == "message" {
+					if message.((*tg.Message)).GroupedID == 0 && (int(time.Now().Unix()) - message.((*tg.Message)).Date) < 60 * 60 * 48 {
+						posts = append(posts, message.((*tg.Message)))
 					}
-				}
 
-				if len((*res_message_history.(*tg.MessagesChannelMessages)).Messages) == 100 {
-					offset += 100
-				} else {
-					break
+					current_date = message.((*tg.Message)).Date
 				}
+			}
 
+			if len((*res_message_history.(*tg.MessagesChannelMessages)).Messages) == 100 {
+				offset += 100
 			} else {
 				break
 			}

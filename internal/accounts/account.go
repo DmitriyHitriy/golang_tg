@@ -160,7 +160,6 @@ func (a *Account) GetUserNext() *tg.User {
 			return user
 		}
 	}
-
 }
 
 func (a *Account) GetPostNext() *tg.Message {

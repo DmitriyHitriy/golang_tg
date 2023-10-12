@@ -55,11 +55,6 @@ func main() {
 		donor.DonorGetUsers()
 		log.Print(account.GetFullName() + "собираем контент с каналов")
 		donor.DonorGetPosts()
-
-		account.Connect()
-		post := account.GetPostNext()
-		account.Channel.CreatePost(*account.GetContext(), account.GetClient(), account.Channel.GetUserName(), post)
-		log.Print(account.GetFullName() + "добавили пост в канал")
 	}
 
 	// Инвайтим юзеров или пишем пост с оффером в группу
@@ -80,13 +75,19 @@ func main() {
 			default:
 				us := account.GetUserNext()
 				account.Connect()
-				account.Channel.InviteToChannel(*account.GetContext(), account.GetClient(), account.Channel.GetChannel(), us)
-				log.Print(account.GetFullName() + "добавили " + us.FirstName + " " + us.LastName + " в канал")
+				res, _ := account.Channel.InviteToChannel(*account.GetContext(), account.GetClient(), account.Channel.GetChannel(), us)
+				if res {
+					log.Print(account.GetFullName() + "добавили " + us.FirstName + " " + us.LastName + " в канал")
+				} else {
+					log.Print(account.GetFullName() + "ошибка добавления " + us.FirstName + " " + us.LastName + " в канал. ")
+				}
+				
 			}
 
 			time.Sleep(5 * time.Second)
 		}
 
+		log.Print("Спим 5 минут...\n")
 		time.Sleep(300 * time.Second)
 	}
 	fmt.Println("Закончили работу")
