@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	//"os"
+	"log"
 	"path/filepath"
 	"time"
 	"math/rand"
@@ -31,15 +31,16 @@ func main() {
 
 		account := accs.Account{}
 		account.Constructor(tdata_folder_path)
+		account.SetConfig(cfg)
 
 		// Проверяем, живой ли аккаунт
 		if account.CheckAcc() {
 			work_accounts.AddAccount(&account)
-
 		}
+		
 		// Проверяем есть ли у аккаунта созданный рекламмный канал
 		if !account.Channel.CheckChannel(account.GetTDataPath()) {
-			fmt.Println("Канал не обнаружен. Создаем.")
+			log.Print(account.GetFullName() + "канал не обнаружен. Создаем...")
 			account.Connect()
 			account.Channel.Createchannel(account.GetClient(), cfg.GetChannelName(), cfg.GetChannelDesc(), cfg.GetChannelPhoto(), account.GetTDataPath())
 		}
@@ -50,12 +51,15 @@ func main() {
 		account.Connect()
 		account.Channel.GetChannelInfo(*account.GetContext(), account.GetClient(),account.Channel.GetChannel())
 		donor := donors.Donor{Account: account}
+		log.Print(account.GetFullName() + "собираем аудиторию с чатов")
 		donor.DonorGetUsers()
+		log.Print(account.GetFullName() + "собираем контент с каналов")
 		donor.DonorGetPosts()
-		p := donor.Account.GetPostNext()
+
 		account.Connect()
-		account.Channel.CreatePost(*account.GetContext(), account.GetClient(), account.Channel.GetUserName(), p)
-		fmt.Println(p)
+		post := account.GetPostNext()
+		account.Channel.CreatePost(*account.GetContext(), account.GetClient(), account.Channel.GetUserName(), post)
+		log.Print(account.GetFullName() + "добавили пост в канал")
 	}
 
 	// Инвайтим юзеров или пишем пост с оффером в группу
@@ -67,17 +71,17 @@ func main() {
 			case mode == 1:
 				account.Connect()
 				account.Channel.ChannelSendMessage(*account.GetContext(), account.GetClient(), account.Channel.GetUserName(), cfg.GetOfferText(), cfg.GetOfferPhoto())
-				fmt.Println("Разместили рекламный оффер")
+				log.Print(account.GetFullName() + "разместили рекламный оффер")
 			case mode > 1 && mode <= 8:
 				account.Connect()
 				post := account.GetPostNext()
 				account.Channel.CreatePost(*account.GetContext(), account.GetClient(), account.Channel.GetUserName(), post)
-				fmt.Println("Разместили пост")
+				log.Print(account.GetFullName() + "добавили пост в канал")
 			default:
 				us := account.GetUserNext()
 				account.Connect()
 				account.Channel.InviteToChannel(*account.GetContext(), account.GetClient(), account.Channel.GetChannel(), us)
-				fmt.Println("Добавили человека в группу")
+				log.Print(account.GetFullName() + "добавили " + us.FirstName + " " + us.LastName + " в канал")
 			}
 
 			time.Sleep(5 * time.Second)

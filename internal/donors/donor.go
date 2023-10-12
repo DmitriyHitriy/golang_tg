@@ -13,22 +13,13 @@ import (
 
 type Donor struct {
 	Account *account.Account
-	Users   []*tg.User
-	Posts []*tg.Message
-}
-
-func (d *Donor) DonorSetUsers(users []*tg.User) {
-	d.Users = users
-}
-
-func (d *Donor) DonorSetPosts(posts []*tg.Message) {
-	d.Posts = posts
 }
 
 func (d *Donor) DonorGetUsers() []*tg.User {
 	var users []*tg.User
 
-	channel_list, err := d.donorGetChannelList()
+	path_auditory_list := d.Account.GetConfig()
+	channel_list, err := d.donorGetList(path_auditory_list.GetParserAuditoryList())
 
 	if err != nil {
 		return users
@@ -59,7 +50,6 @@ func (d *Donor) DonorGetUsers() []*tg.User {
 		}
 	}
 
-	d.DonorSetUsers(users)
 	d.Account.SetUsers(users)
 
 	return users
@@ -69,7 +59,8 @@ func (d *Donor) DonorGetUsers() []*tg.User {
 func (d *Donor) DonorGetPosts() []*tg.Message {
 	var posts []*tg.Message
 
-	channel_list, err := d.donorGetChannelList()
+	path_content_list := d.Account.GetConfig()
+	channel_list, err := d.donorGetList(path_content_list.GetParserContentList())
 
 	if err != nil {
 		return posts
@@ -98,7 +89,6 @@ func (d *Donor) DonorGetPosts() []*tg.Message {
 		}
 	}
 
-	d.DonorSetPosts(posts)
 	d.Account.SetPosts(posts)
 
 	return posts
@@ -134,10 +124,6 @@ func (d *Donor) donorSearchUsersFromMessagesChannel(tg_channel *tg.Channel) []*t
 						continue
 					}
 					users = append(users, user.((*tg.User)))
-
-					// if elementExists(users, user.((*tg.User)).ID) == false {
-					// 	users = append(users, user.((*tg.User)))
-					// }
 				}
 
 				if len((*res.(*tg.MessagesChannelMessages)).Messages) == 100 {
@@ -187,7 +173,7 @@ func (d *Donor) donorGetPostsChannel(tg_channel *tg.Channel) []*tg.Message {
 				for _, message := range messages {
 				
 					if message.TypeName() == "message" {
-						if message.((*tg.Message)).GroupedID == 0 && (int(time.Now().Unix()) - message.((*tg.Message)).Date) < 60 * 60 * 24 {
+						if message.((*tg.Message)).GroupedID == 0 && (int(time.Now().Unix()) - message.((*tg.Message)).Date) < 60 * 60 * 48 {
 							posts = append(posts, message.((*tg.Message)))
 						}
 					}
@@ -240,8 +226,8 @@ func (d *Donor) donorSearchChannelFromQueryString(query string, limit int) []*tg
 
 }
 
-func (d *Donor) donorGetChannelList() ([]string, error) {
-	file, err := os.Open("input/channel_list")
+func (d *Donor) donorGetList(path string) ([]string, error) {
+	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}

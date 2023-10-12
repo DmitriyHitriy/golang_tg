@@ -3,11 +3,11 @@ package account
 import (
 	"bufio"
 	"context"
-	"fmt"
 	"math/rand"
 	"os"
 	"strconv"
 	"time"
+	"log"
 
 	"github.com/gotd/td/session"
 	"github.com/gotd/td/session/tdesktop"
@@ -17,6 +17,7 @@ import (
 	"golang.org/x/exp/slices"
 
 	channel "golang_tg/internal/channels"
+	config "golang_tg/internal/configs"
 )
 
 type Account struct {
@@ -30,6 +31,7 @@ type Account struct {
 	users      []*tg.User
 	posts      []*tg.Message
 	ctx        context.Context
+	config     config.Configs
 	Channel    channel.Channel
 }
 
@@ -67,19 +69,20 @@ func (a *Account) Constructor(path string) {
 }
 
 func (a *Account) CheckAcc() bool {
-
-	if err := a.client.Run(a.ctx, func(ctx context.Context) error {
+	err := a.client.Run(a.ctx, func(ctx context.Context) error {
 		me, err := a.client.Self(ctx)
-		fmt.Println("Успешно авторизовались: ", me.FirstName, me.LastName)
 
 		a.SetFirstName(me.FirstName)
 		a.SetLastName(me.LastName)
 		a.SetUsername(me.Username)
 		a.SetPhone(me.Phone)
 		a.SetLastUse()
+		
+		log.Println(a.GetFullName() + "успешно авторизовались")
 		return err
-	}); err != nil {
-		fmt.Println(err)
+	})
+
+	if err != nil {
 		return false
 	}
 
@@ -124,7 +127,15 @@ func (a *Account) GetUsers() []*tg.User {
 }
 
 func (a *Account) GetPosts() []*tg.Message {
-    return a.posts
+	return a.posts
+}
+
+func (a *Account) GetConfig() config.Configs {
+	return a.config
+}
+
+func (a *Account) GetFullName() string {
+	return a.GetFirstName() + " " + a.GetLastName() + " "
 }
 
 func (a *Account) GetUserNext() *tg.User {
@@ -143,12 +154,13 @@ func (a *Account) GetUserNext() *tg.User {
 		a.SetUsers(new_user_list)
 
 		global_invited_users := a.readGlobalUsesDonor()
-        
+
 		if !a.isGlobalUsesDonor(global_invited_users, int(user.ID)) {
 			a.addGlobalUsesDonor(int(user.ID))
 			return user
 		}
 	}
+
 }
 
 func (a *Account) GetPostNext() *tg.Message {
@@ -167,12 +179,13 @@ func (a *Account) GetPostNext() *tg.Message {
 		a.SetPosts(new_post_list)
 
 		global_used_posts := a.readGlobalUsesDonor()
-        id_post, _ := strconv.Atoi(strconv.Itoa(post.Date) + strconv.Itoa(post.ID))
+		id_post, _ := strconv.Atoi(strconv.Itoa(post.Date) + strconv.Itoa(post.ID))
 		if !a.isGlobalUsesDonor(global_used_posts, id_post) {
 			a.addGlobalUsesDonor(id_post)
 			return post
 		}
 	}
+
 }
 
 func (a *Account) SetClient(client *telegram.Client) {
@@ -209,6 +222,10 @@ func (a *Account) SetUsers(users []*tg.User) {
 
 func (a *Account) SetPosts(posts []*tg.Message) {
 	a.posts = posts
+}
+
+func (a *Account) SetConfig(config config.Configs) {
+	a.config = config
 }
 
 func (a *Account) readGlobalUsesDonor() []string {

@@ -5,11 +5,13 @@ import (
 )
 
 type Configs struct {
-	channel_name string
-	channel_desc string
-	channel_photo string
-	offer_text string
-	offer_photo string
+	channel_name         string
+	channel_desc         string
+	channel_photo        string
+	offer_text           string
+	offer_photo          string
+	parser_auditory_list string
+	parser_content_list  string
 }
 
 func (c *Configs) New() *Configs {
@@ -22,6 +24,8 @@ func (c *Configs) New() *Configs {
 	channel_photo, _ := cfg.String("channel_photo")
 	offer_text, _ := cfg.String("offer_text")
 	offer_photo, _ := cfg.String("offer_photo")
+	parser_auditory_list, _ := cfg.String("parser_auditory_list")
+	parser_content_list, _ := cfg.String("parser_content_list")
 
 	if channel_name == "" || channel_desc == "" {
 		panic("channel_name and channel_desc")
@@ -32,6 +36,8 @@ func (c *Configs) New() *Configs {
 	c.setChannelPhoto(channel_photo)
 	c.setOfferText(offer_text)
 	c.setOfferPhoto(offer_photo)
+	c.setParserAuditoryList(parser_auditory_list)
+	c.setParserContentList(parser_content_list)
 
 	return c
 }
@@ -56,6 +62,14 @@ func (c *Configs) GetOfferPhoto() string {
 	return c.offer_photo
 }
 
+func (c *Configs) GetParserAuditoryList() string {
+	return c.parser_auditory_list
+}
+
+func (c *Configs) GetParserContentList() string {
+	return c.parser_content_list
+}
+
 func (c *Configs) setChannelName(channel_name string) {
 	c.channel_name = channel_name
 }
@@ -74,4 +88,12 @@ func (c *Configs) setOfferText(offer_text string) {
 
 func (c *Configs) setOfferPhoto(offer_photo string) {
 	c.offer_photo = offer_photo
+}
+
+func (c *Configs) setParserAuditoryList(parser_auditory_list string) {
+	c.parser_auditory_list = parser_auditory_list
+}
+
+func (c *Configs) setParserContentList(parser_content_list string) {
+	c.parser_content_list = parser_content_list
 }

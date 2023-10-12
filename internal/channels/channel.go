@@ -83,13 +83,8 @@ func (c *Channel) InviteToChannel(ctx context.Context, client *telegram.Client, 
 			Users:   []tg.InputUserClass{us},
 		}
 
-		res, e := raw.ChannelsInviteToChannel(ctx, &req)
+		_, e := raw.ChannelsInviteToChannel(ctx, &req)
 
-		if e != nil {
-			fmt.Println("Ошибка добавления в канал ", e)
-		}
-
-		fmt.Println(res)
 		fmt.Println(e)
 
 		return e
