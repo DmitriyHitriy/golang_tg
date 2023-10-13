@@ -2,7 +2,6 @@ package channel
 
 import (
 	"context"
-	"fmt"
 	"path/filepath"
 	"strings"
 	"time"
@@ -134,6 +133,21 @@ func (c *Channel) GetChannelInfo(ctx context.Context, client *telegram.Client, c
 		c.SetAccessHash(channel_data.AccessHash)
 		c.SetTitle(channel_data.Title)
 		c.SetUserName(channel_data.Username)
+
+		return err
+	}); err != nil {
+		panic(err)
+	}
+}
+
+func (c *Channel) GetPaticipantsCountFromChannel(ctx context.Context, client *telegram.Client, channel *tg.InputChannel){
+	if err := client.Run(ctx, func(ctx context.Context) error {
+		var err error
+		raw := tg.NewClient(client)
+
+		res, _ := raw.ChannelsGetFullChannel(ctx, channel)
+		channel_data := (*(*res).FullChat.(*tg.ChannelFull))
+
 		c.SetParticipantsCount(channel_data.ParticipantsCount)
 
 		return err
@@ -154,7 +168,7 @@ func (c *Channel) ChannelSendMessage(ctx context.Context, client *telegram.Clien
 			}
 
 			return r, nil
-		})).Photo(ctx, html.String(nil, text))
+		})).Photo(ctx, html.String(nil, text + "\n #myoffer"))
 
 		return err
 	}); err != nil {

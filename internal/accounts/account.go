@@ -18,6 +18,7 @@ import (
 
 	channel "golang_tg/internal/channels"
 	config "golang_tg/internal/configs"
+	stats "golang_tg/internal/statistics"
 )
 
 type Account struct {
@@ -33,6 +34,7 @@ type Account struct {
 	ctx        context.Context
 	config     config.Configs
 	Channel    channel.Channel
+	Stats	stats.Stats
 }
 
 func (a *Account) Connect() {
@@ -135,7 +137,7 @@ func (a *Account) GetConfig() config.Configs {
 }
 
 func (a *Account) GetFullName() string {
-	fullname_and_stat := a.GetFirstName() + " " + a.GetLastName() + " (аккаунтов: " + strconv.Itoa(len(a.GetUsers())) + ", постов: " + strconv.Itoa(len(a.GetPosts())) + ") "
+	fullname_and_stat := a.GetFirstName() + " " + a.GetLastName() + " (очередь инвайтинга: " + strconv.Itoa(len(a.GetUsers())) + ", очередь постинга: " + strconv.Itoa(len(a.GetPosts())) + ") "
 	return fullname_and_stat
 }
 
@@ -186,6 +188,22 @@ func (a *Account) GetPostNext() *tg.Message {
 		}
 	}
 
+}
+
+func (a *Account) PrintStats() string {
+	a.Connect()
+	a.Channel.GetPaticipantsCountFromChannel(*a.GetContext(), a.GetClient(), a.Channel.GetChannel())
+
+	a.Connect()
+	a.Stats.GetStats(*a.GetContext(), a.GetClient(), a.Channel)
+
+	participants_count := a.Channel.GetParticipantsCount()
+	offer_count := a.Stats.GetOfferCount()
+	offer_views_count := a.Stats.GetOfferViewsCount()
+	posts_count := a.Stats.GetPostsCount()
+	posts_views_count := a.Stats.GetPostsViewsCount()
+
+	return "Подписчиков: " + strconv.Itoa(participants_count) + " Офферов: " + strconv.Itoa(offer_count) + " Просмотров офферов: " + strconv.Itoa(offer_views_count) + " Постов: " + strconv.Itoa(posts_count) + " Просмотров постов: " + strconv.Itoa(posts_views_count) + " "
 }
 
 func (a *Account) SetClient(client *telegram.Client) {
