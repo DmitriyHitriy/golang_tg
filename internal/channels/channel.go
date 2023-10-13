@@ -147,7 +147,7 @@ func (c *Channel) ChannelSendMessage(ctx context.Context, client *telegram.Clien
 		var err error
 		raw := tg.NewClient(client)
 		
-		nm, _ := message.NewSender(raw).Resolve(channel).Upload(message.Upload(func(ctx context.Context, b message.Uploader) (tg.InputFileClass, error) {
+		message.NewSender(raw).Resolve(channel).Upload(message.Upload(func(ctx context.Context, b message.Uploader) (tg.InputFileClass, error) {
 			r, err := b.FromPath(ctx, photo)
 			if err != nil {
 				return nil, err
@@ -155,9 +155,6 @@ func (c *Channel) ChannelSendMessage(ctx context.Context, client *telegram.Clien
 
 			return r, nil
 		})).Photo(ctx, html.String(nil, text))
-
-		fmt.Println(nm)
-		fmt.Println(err)
 
 		return err
 	}); err != nil {

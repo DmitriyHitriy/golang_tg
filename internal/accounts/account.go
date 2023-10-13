@@ -77,7 +77,7 @@ func (a *Account) CheckAcc() bool {
 		a.SetUsername(me.Username)
 		a.SetPhone(me.Phone)
 		a.SetLastUse()
-		
+
 		log.Println(a.GetFullName() + "успешно авторизовались")
 		return err
 	})
@@ -135,7 +135,8 @@ func (a *Account) GetConfig() config.Configs {
 }
 
 func (a *Account) GetFullName() string {
-	return a.GetFirstName() + " " + a.GetLastName() + " "
+	fullname_and_stat := a.GetFirstName() + " " + a.GetLastName() + " (аккаунтов: " + strconv.Itoa(len(a.GetUsers())) + ", постов: " + strconv.Itoa(len(a.GetPosts())) + ") "
+	return fullname_and_stat
 }
 
 func (a *Account) GetUserNext() *tg.User {

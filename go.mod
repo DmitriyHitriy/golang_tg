@@ -11,13 +11,11 @@ require (
 
 require (
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
-	github.com/fmorenovr/gotry v0.0.0-20190819174022-76e4fe5fe9d6 // indirect
 	github.com/go-faster/errors v0.6.1 // indirect
 	github.com/go-faster/jx v1.1.0 // indirect
 	github.com/go-faster/xor v1.0.0 // indirect
 	github.com/gotd/ige v0.2.2 // indirect
 	github.com/gotd/neo v0.1.5 // indirect
-	github.com/jenazads/gotry v0.0.0-20190819174022-76e4fe5fe9d6 // indirect
 	github.com/klauspost/compress v1.16.7 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/segmentio/asm v1.2.0 // indirect

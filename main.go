@@ -62,6 +62,8 @@ func main() {
 		mode := rand.Intn(20-1) + 1
 
 		for _, account := range work_accounts.Accounts {
+			log.Println(account.GetFullName())
+			
 			switch {
 			case mode == 1:
 				account.Connect()
