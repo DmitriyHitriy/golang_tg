@@ -5,6 +5,7 @@ import (
 	"context"
 	"os"
 	"time"
+	"strings"
 
 	"github.com/gotd/td/tg"
 
@@ -85,7 +86,9 @@ func (d *Donor) DonorGetPosts() []*tg.Message {
 		d.Account.Connect()
 		posts_tmp := d.donorGetPostsChannel(channel)
 		for _, post := range posts_tmp {
-			posts = append(posts, post)
+			if !strings.Contains(post.Message, "http") {
+				posts = append(posts, post)
+			}
 		}
 	}
 
