@@ -84,6 +84,6 @@ func main() {
 		}
 
 		log.Print("Спим 5 минут...\n")
-		time.Sleep(600 * time.Second)
+		time.Sleep(10 * time.Second)
 	}
 }

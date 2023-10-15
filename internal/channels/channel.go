@@ -99,8 +99,10 @@ func (c *Channel) CreatePost(ctx context.Context, client *telegram.Client, chann
 	if err := client.Run(ctx, func(ctx context.Context) error {
 		var err error
 		raw := tg.NewClient(client)
+		type_message := post.Media.TypeName()
 
-		if post.Media.TypeName() == "messageMediaPhoto" {
+		switch type_message {
+		case "messageMediaPhoto":
 			media := post.Media.(*tg.MessageMediaPhoto)
 			photo, _ := media.GetPhoto()
 			originPhoto := photo.(*tg.Photo)
@@ -111,9 +113,21 @@ func (c *Channel) CreatePost(ctx context.Context, client *telegram.Client, chann
 				ThumbSize: "500",
 			}
 
-		message.NewSender(raw).Resolve(channel).Photo(ctx, &photo_file_location, html.String(nil, post.Message))
+			message.NewSender(raw).Resolve(channel).Photo(ctx, &photo_file_location, html.String(nil, post.Message))
+		case "messageMediaDocument":
+			media := post.Media.(*tg.MessageMediaDocument)
+			doc, _ := media.GetDocument()
+			origin_doc := doc.(*tg.Document)
+			doc_file_location := tg.InputDocumentFileLocation{
+				ID: origin_doc.GetID(),
+				AccessHash: origin_doc.GetAccessHash(),
+				FileReference: origin_doc.GetFileReference(),
+				ThumbSize: "500",
+			}
+			message.NewSender(raw).Resolve(channel).Document(ctx, &doc_file_location, html.String(nil, post.Message))
+		default:
+			message.NewSender(raw).Resolve(channel).StyledText(ctx, html.String(nil, post.Message))
 		}
-		
 
 		return err
 	}); err != nil {
