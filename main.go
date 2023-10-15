@@ -66,22 +66,18 @@ func main() {
 			case mode == 1:
 				account.Connect()
 				account.Channel.ChannelSendMessage(*account.GetContext(), account.GetClient(), account.Channel.GetUserName(), cfg.GetOfferText(), cfg.GetOfferPhoto())
-				//log.Print(account.GetFullName() + "разместили рекламный оффер")
 			case mode > 1 && mode <= 8:
 				account.Connect()
 				post := account.GetPostNext()
-				account.Channel.CreatePost(*account.GetContext(), account.GetClient(), account.Channel.GetUserName(), post)
-				//log.Print(account.GetFullName() + "добавили пост в канал")
+				if post != nil{
+					account.Channel.CreatePost(*account.GetContext(), account.GetClient(), account.Channel.GetUserName(), post)
+				}
 			default:
 				us := account.GetUserNext()
-				account.Connect()
-				account.Channel.InviteToChannel(*account.GetContext(), account.GetClient(), account.Channel.GetChannel(), us)
-				// if res {
-				// 	log.Print(account.GetFullName() + "добавили " + us.FirstName + " " + us.LastName + " в канал")
-				// } else {
-				// 	log.Print(account.GetFullName() + "ошибка добавления " + us.FirstName + " " + us.LastName + " в канал. ")
-				// }
-				
+				if us != nil {
+					account.Connect()
+					account.Channel.InviteToChannel(*account.GetContext(), account.GetClient(), account.Channel.GetChannel(), us)
+				}
 			}
 			log.Print(account.GetFullName() + account.PrintStats())
 
@@ -91,5 +87,4 @@ func main() {
 		log.Print("Спим 5 минут...\n")
 		time.Sleep(600 * time.Second)
 	}
-	fmt.Println("Закончили работу")
 }
