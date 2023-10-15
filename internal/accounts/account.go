@@ -3,11 +3,11 @@ package account
 import (
 	"bufio"
 	"context"
+	"log"
 	"math/rand"
 	"os"
 	"strconv"
 	"time"
-	"log"
 
 	"github.com/gotd/td/session"
 	"github.com/gotd/td/session/tdesktop"
@@ -28,13 +28,14 @@ type Account struct {
 	phone      string
 	tdata_path string
 	last_use   time.Time
+	next_use   time.Time
 	client     *telegram.Client
 	users      []*tg.User
 	posts      []*tg.Message
 	ctx        context.Context
 	config     config.Configs
 	Channel    channel.Channel
-	Stats	stats.Stats
+	Stats      stats.Stats
 }
 
 func (a *Account) Connect() {
@@ -118,6 +119,10 @@ func (a *Account) GetTDataPath() string {
 
 func (a *Account) GetLastUse() time.Time {
 	return a.last_use
+}
+
+func (a *Account) GetNextUse() time.Time {
+	return a.next_use
 }
 
 func (a *Account) GetContext() *context.Context {
@@ -236,6 +241,10 @@ func (a *Account) SetLastUse() {
 	a.last_use = time.Now()
 }
 
+func (a *Account) SetNextUse(duration int) {
+	a.next_use = time.Now().Add(time.Duration(duration))
+}
+
 func (a *Account) SetUsers(users []*tg.User) {
 	a.users = users
 }
@@ -285,4 +294,15 @@ func (a *Account) isGlobalUsesDonor(haystack []string, id int) bool {
 		}
 	}
 	return false
+}
+
+func (a *Account) IsPossibleToUse() bool {
+	current_date := time.Now()
+	next_use := a.GetNextUse()
+
+	if current_date.Unix() >= next_use.Unix() {
+		return true
+	} else {
+		return false
+	}
 }
