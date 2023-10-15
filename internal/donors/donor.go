@@ -3,7 +3,6 @@ package donors
 import (
 	"bufio"
 	"context"
-	"fmt"
 	"os"
 	"time"
 
