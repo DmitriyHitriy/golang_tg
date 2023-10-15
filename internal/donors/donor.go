@@ -159,7 +159,7 @@ func (d *Donor) donorGetPostsChannel(tg_channel *tg.Channel) []*tg.Message {
 		var offset int
 		date_last_message := int(time.Now().Unix())
 		current_date := int(time.Now().Unix())
-		count_iter := 1
+
 		for current_date - date_last_message < 60 * 60 * 24 * 7 {
 			req_message_history := tg.MessagesGetHistoryRequest{
 				Peer:      ch,
@@ -189,9 +189,9 @@ func (d *Donor) donorGetPostsChannel(tg_channel *tg.Channel) []*tg.Message {
 			} else {
 				break
 			}
-			count_iter += 1
+
 		}
-		fmt.Println(count_iter)
+
 		return err
 	}); err != nil {
 		panic(err)
