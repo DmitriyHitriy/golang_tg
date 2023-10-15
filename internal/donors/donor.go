@@ -159,7 +159,7 @@ func (d *Donor) donorGetPostsChannel(tg_channel *tg.Channel) []*tg.Message {
 		date_last_message := int(time.Now().Unix())
 		current_date := int(time.Now().Unix())
 
-		for current_date - date_last_message < 60 * 60 * 24 * 7 {
+		for current_date - date_last_message < 60 * 60 * 24 * 14 {
 			req_message_history := tg.MessagesGetHistoryRequest{
 				Peer:      ch,
 				Limit:     100,
@@ -175,7 +175,7 @@ func (d *Donor) donorGetPostsChannel(tg_channel *tg.Channel) []*tg.Message {
 			for _, message := range messages {
 			
 				if message.TypeName() == "message" {
-					if message.((*tg.Message)).GroupedID == 0 && (int(time.Now().Unix()) - message.((*tg.Message)).Date) < 60 * 60 * 24 * 7 {
+					if message.((*tg.Message)).GroupedID == 0 && (int(time.Now().Unix()) - message.((*tg.Message)).Date) < 60 * 60 * 24 * 14 {
 						posts = append(posts, message.((*tg.Message)))
 					}
 
