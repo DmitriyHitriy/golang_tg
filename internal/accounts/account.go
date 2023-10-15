@@ -180,12 +180,14 @@ func (a *Account) GetPostNext() *tg.Message {
 
 		a.SetPosts(new_post_list)
 
-		global_used_posts := a.readGlobalUsesDonor()
-		id_post, _ := strconv.Atoi(strconv.Itoa(post.Date) + strconv.Itoa(post.ID))
-		if !a.isGlobalUsesDonor(global_used_posts, id_post) {
-			a.addGlobalUsesDonor(id_post)
-			return post
-		}
+		// global_used_posts := a.readGlobalUsesDonor()
+		// id_post, _ := strconv.Atoi(strconv.Itoa(post.Date) + strconv.Itoa(post.ID))
+		// if !a.isGlobalUsesDonor(global_used_posts, id_post) {
+		// 	a.addGlobalUsesDonor(id_post)
+		// 	return post
+		// }
+
+		return post
 	}
 
 }
