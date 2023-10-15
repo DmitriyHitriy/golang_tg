@@ -75,7 +75,8 @@ func main() {
 				us := account.GetUserNext()
 				if us != nil {
 					account.Connect()
-					account.Channel.InviteToChannel(*account.GetContext(), account.GetClient(), account.Channel.GetChannel(), us)
+					_, err := account.Channel.InviteToChannel(*account.GetContext(), account.GetClient(), account.Channel.GetChannel(), us)
+					log.Print(account.GetFullName() + " " + err.Error())
 				}
 			}
 			log.Print(account.GetFullName() + account.PrintStats())
