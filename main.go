@@ -66,7 +66,7 @@ func main() {
 			case mode == 1:
 				account.Connect()
 				account.Channel.ChannelSendMessage(*account.GetContext(), account.GetClient(), account.Channel.GetUserName(), cfg.GetOfferText(), cfg.GetOfferPhoto())
-			case mode > 1 && mode <= 5:
+			case mode > 1 && mode <= 9:
 				account.Connect()
 				post := account.GetPostNext()
 				log.Print(post.String())

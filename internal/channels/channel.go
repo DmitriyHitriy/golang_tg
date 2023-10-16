@@ -98,13 +98,12 @@ func (c *Channel) InviteToChannel(ctx context.Context, client *telegram.Client, 
 func (c *Channel) CreatePost(ctx context.Context, client *telegram.Client, channel string, post *tg.Message) {
 	if err := client.Run(ctx, func(ctx context.Context) error {
 		var err error
+		var type_message string
 		raw := tg.NewClient(client)
 		
-		if post.Media == nil {
-			return err
+		if post.Media != nil {
+			type_message = post.Media.TypeName()
 		}
-
-		type_message := post.Media.TypeName()
 
 		switch type_message {
 		case "messageMediaPhoto":
@@ -130,7 +129,7 @@ func (c *Channel) CreatePost(ctx context.Context, client *telegram.Client, chann
 				ThumbSize: "500",
 			}
 			message.NewSender(raw).Resolve(channel).Document(ctx, &doc_file_location, html.String(nil, post.Message))
-		default:
+		case "":
 			message.NewSender(raw).Resolve(channel).StyledText(ctx, html.String(nil, post.Message))
 		}
 
