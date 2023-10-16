@@ -99,6 +99,11 @@ func (c *Channel) CreatePost(ctx context.Context, client *telegram.Client, chann
 	if err := client.Run(ctx, func(ctx context.Context) error {
 		var err error
 		raw := tg.NewClient(client)
+		
+		if post.Media == nil {
+			return err
+		}
+
 		type_message := post.Media.TypeName()
 
 		switch type_message {

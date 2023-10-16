@@ -81,7 +81,7 @@ func main() {
 					if err != nil {
 						log.Print(account.GetFullName() + " " + err.Error())
 						if strings.Contains(err.Error(), "FLOOD"){
-							account.SetNextUse(10000)
+							account.SetNextUse(30000)
 						}
 					}
 				}
