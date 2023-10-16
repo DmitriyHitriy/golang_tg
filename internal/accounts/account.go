@@ -242,7 +242,7 @@ func (a *Account) SetLastUse() {
 }
 
 func (a *Account) SetNextUse(duration int) {
-	a.next_use = time.Now().Add(time.Duration(duration))
+	a.next_use = time.Now().Add(time.Minute * 20)
 }
 
 func (a *Account) SetUsers(users []*tg.User) {
