@@ -69,7 +69,6 @@ func main() {
 			case mode > 1 && mode <= 9:
 				account.Connect()
 				post := account.GetPostNext()
-				log.Print(post.String())
 				if post != nil{
 					account.Channel.CreatePost(*account.GetContext(), account.GetClient(), account.Channel.GetUserName(), post)
 				}
