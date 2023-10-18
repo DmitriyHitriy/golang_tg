@@ -7,12 +7,14 @@ import (
 	"strings"
 	"time"
 
+
 	accs "golang_tg/internal/accounts"
 	cfg "golang_tg/internal/configs"
 	donors "golang_tg/internal/donors"
 )
 
 func main() {
+
 	// Читаем конфигурационный файл
 	// Без него паникуем
 	cfg := cfg.Configs{}
