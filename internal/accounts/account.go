@@ -6,12 +6,16 @@ import (
 	"log"
 	"math/rand"
 	"os"
+	"path/filepath"
 	"strconv"
 	"time"
+	"strings"
+	"fmt"
 
 	"github.com/gotd/td/session"
 	"github.com/gotd/td/session/tdesktop"
 	"github.com/gotd/td/telegram"
+	"github.com/gotd/td/telegram/auth"
 	"github.com/gotd/td/tg"
 
 	"golang.org/x/exp/slices"
@@ -27,6 +31,7 @@ type Account struct {
 	username   string
 	phone      string
 	tdata_path string
+	auth_type  string
 	last_use   time.Time
 	next_use   time.Time
 	client     *telegram.Client
@@ -40,6 +45,7 @@ type Account struct {
 
 func (a *Account) Connect() {
 	a.Constructor(a.GetTDataPath())
+
 }
 
 func (a *Account) Constructor(path string) {
@@ -47,6 +53,7 @@ func (a *Account) Constructor(path string) {
 	a.ctx = ctx
 
 	a.SetTDataPath(path)
+	a.setAuthType("tdata")
 
 	accounts, err := tdesktop.Read(a.GetTDataPath(), nil)
 	if err != nil {
@@ -58,16 +65,23 @@ func (a *Account) Constructor(path string) {
 		panic(err)
 	}
 
-	var (
-		storage = new(session.StorageMemory)
-		loader  = session.Loader{Storage: storage}
-	)
+	var storage_memory = new(session.StorageMemory)
+	var loader = session.Loader{Storage: storage_memory}
+	opts := telegram.Options{SessionStorage: storage_memory}
 
 	if err := loader.Save(ctx, data); err != nil {
 		panic(err)
 	}
 
-	a.client = telegram.NewClient(1, "s", telegram.Options{SessionStorage: storage})
+	if a.isSessionFile() {
+		var storage_file = new(session.FileStorage)
+		storage_file.Path = filepath.Join(a.GetTDataPath(), "session.session")
+		storage_file.LoadSession(ctx)
+		opts = telegram.Options{SessionStorage: storage_file}
+		a.setAuthType("session")
+	}
+
+	a.client = telegram.NewClient(1, "s", opts)
 
 }
 
@@ -93,6 +107,60 @@ func (a *Account) CheckAcc() bool {
 
 }
 
+func (a *Account) AuthSession(path string) {
+	if !a.isSessionFile() {
+		ctx := context.Background()
+		//app_id := 20234402
+		app_id := a.getAppID()
+		app_accesshash := "bdcfbbabf9d21bdf262f7348926ac292"
+		phone := "+1 929 698 3992"
+		twofa := "Fvnh215fgrd"
+
+		// fmt.Print("app_id:")
+		// app_id_s, _ := bufio.NewReader(os.Stdin).ReadString('\n')
+		// app_id_s = strings.ReplaceAll(app_id_s, "\n", "")
+		// app_id, _ := strconv.Atoi(app_id_s)
+
+		// fmt.Print("app_accesshash:")
+		// app_accesshash, _ := bufio.NewReader(os.Stdin).ReadString('\n')
+		// app_accesshash = strings.ReplaceAll(app_accesshash, "\n", "")
+
+		// fmt.Print("phone:")
+		// phone, _ := bufio.NewReader(os.Stdin).ReadString('\n')
+		// phone = strings.ReplaceAll(phone, "\n", "")
+
+		// fmt.Print("2FA:")
+		// twofa, _ := bufio.NewReader(os.Stdin).ReadString('\n')
+		// twofa = strings.ReplaceAll(twofa, "\n", "")
+
+		codeAsk := func(ctx context.Context, sentCode *tg.AuthSentCode) (string, error) {
+			fmt.Print("code:")
+			code, err := bufio.NewReader(os.Stdin).ReadString('\n')
+			if err != nil {
+				return "", err
+			}
+			code = strings.ReplaceAll(code, "\n", "")
+			return code, nil
+		}
+		var storage = new(session.StorageMemory)
+		
+		client := telegram.NewClient(app_id, app_accesshash, telegram.Options{SessionStorage: storage})
+		
+		client.Run(ctx, func(ctx context.Context) error {
+			fmt.Println("next_func")
+			res := auth.NewFlow(
+				auth.Constant(phone, twofa, auth.CodeAuthenticatorFunc(codeAsk)),
+				auth.SendCodeOptions{},
+			).Run(ctx, client.Auth())
+			
+			storage.WriteFile(filepath.Join(path, "session.session"), 0644)
+			fmt.Println(client.Self(ctx))
+			return res
+		})
+		
+	}
+}
+
 func (a *Account) GetClient() *telegram.Client {
 	return a.client
 }
@@ -115,6 +183,10 @@ func (a *Account) GetPhone() string {
 
 func (a *Account) GetTDataPath() string {
 	return a.tdata_path
+}
+
+func (a *Account) GetAuthType() string {
+	return a.auth_type
 }
 
 func (a *Account) GetLastUse() time.Time {
@@ -142,7 +214,7 @@ func (a *Account) GetConfig() config.Configs {
 }
 
 func (a *Account) GetFullName() string {
-	fullname_and_stat := a.GetFirstName() + " " + a.GetLastName() + " (очередь инвайтинга: " + strconv.Itoa(len(a.GetUsers())) + ", очередь постинга: " + strconv.Itoa(len(a.GetPosts())) + ") "
+	fullname_and_stat := a.GetFirstName() + " " + a.GetLastName() + "(" + a.GetAuthType() + ")" + " (очередь инвайтинга: " + strconv.Itoa(len(a.GetUsers())) + ", очередь постинга: " + strconv.Itoa(len(a.GetPosts())) + ") "
 	return fullname_and_stat
 }
 
@@ -197,6 +269,15 @@ func (a *Account) GetPostNext() *tg.Message {
 
 }
 
+func (a *Account) getAppID() int {
+	fmt.Print("app_id:")
+	app_id_s, _ := bufio.NewReader(os.Stdin).ReadString('\n')
+	app_id_s = strings.ReplaceAll(app_id_s, "\n", "")
+	app_id, _ := strconv.Atoi(app_id_s)
+	fmt.Println("func")
+	return app_id
+}
+
 func (a *Account) PrintStats() string {
 	a.Connect()
 	a.Channel.GetPaticipantsCountFromChannel(*a.GetContext(), a.GetClient(), a.Channel.GetChannel())
@@ -235,6 +316,10 @@ func (a *Account) SetPhone(phone string) {
 
 func (a *Account) SetTDataPath(tdata_path string) {
 	a.tdata_path = tdata_path
+}
+
+func (a *Account) setAuthType(auth_type string) {
+	a.auth_type = auth_type
 }
 
 func (a *Account) SetLastUse() {
@@ -305,4 +390,15 @@ func (a *Account) IsPossibleToUse() bool {
 	} else {
 		return false
 	}
+}
+
+func (a *Account) isSessionFile() bool {
+	f, e := os.Open(filepath.Join(a.GetTDataPath(), "session.session"))
+	if e != nil {
+		return false
+	}
+
+	defer f.Close()
+
+	return true
 }

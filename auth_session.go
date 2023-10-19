@@ -44,7 +44,6 @@ func main3() {
 		).Run(ctx, client.Auth())
 		storage.WriteFile("aaa.session", 0644)
 		fmt.Println(client.Self(ctx))
-		client.API().Send
 		return res
 	})
 	

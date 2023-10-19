@@ -11,8 +11,7 @@ import (
 )
 
 func main4() {
-	app_id := 29917381
-	app_acceshash := "be04216d4206c2eaad612101f3e07013"
+
 
 	ctx := context.Background()
 	var (
@@ -22,7 +21,7 @@ func main4() {
 	storage.Path = "aaa.session"
 	storage.LoadSession(ctx)
 
-	client := telegram.NewClient(app_id, app_acceshash, telegram.Options{SessionStorage: storage})
+	client := telegram.NewClient(1, "s", telegram.Options{SessionStorage: storage})
 
 	client.Run(ctx, func(ctx context.Context) error {
 		var err error
