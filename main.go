@@ -32,7 +32,7 @@ func main() {
 		tdata_folder_path := filepath.Join(acc_dir, "tdata")
 
 		account := accs.Account{}
-		//account.AuthSession(tdata_folder_path)
+		account.AuthSession(tdata_folder_path)
 		account.Constructor(tdata_folder_path)
 		account.SetConfig(cfg)
 		

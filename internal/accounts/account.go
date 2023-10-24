@@ -3,14 +3,14 @@ package account
 import (
 	"bufio"
 	"context"
+	"fmt"
 	"log"
 	"math/rand"
 	"os"
 	"path/filepath"
 	"strconv"
-	"time"
 	"strings"
-	"fmt"
+	"time"
 
 	"github.com/gotd/td/session"
 	"github.com/gotd/td/session/tdesktop"
@@ -26,21 +26,31 @@ import (
 )
 
 type Account struct {
-	first_name string
-	last_name  string
-	username   string
-	phone      string
-	tdata_path string
-	auth_type  string
-	last_use   time.Time
-	next_use   time.Time
-	client     *telegram.Client
-	users      []*tg.User
-	posts      []*tg.Message
-	ctx        context.Context
-	config     config.Configs
-	Channel    channel.Channel
-	Stats      stats.Stats
+	first_name    string
+	last_name     string
+	username      string
+	phone         string
+	app_id        int
+	app_acceshash string
+	twofa         string
+	tdata_path    string
+	auth_type     string
+	last_use      time.Time
+	next_use      time.Time
+	client        *telegram.Client
+	users         []*tg.User
+	posts         []*tg.Message
+	ctx           context.Context
+	config        config.Configs
+	Channel       channel.Channel
+	Stats         stats.Stats
+}
+
+type accountAuthData struct {
+	app_id        int
+	app_acceshash string
+	phone         string
+	twofa         string
 }
 
 func (a *Account) Connect() {
@@ -110,29 +120,13 @@ func (a *Account) CheckAcc() bool {
 func (a *Account) AuthSession(path string) {
 	if !a.isSessionFile() {
 		ctx := context.Background()
-		//app_id := 20234402
-		app_id := a.getAppID()
+		app_id := 20234402
+		// app_id := a.getAppID()
 		app_accesshash := "bdcfbbabf9d21bdf262f7348926ac292"
 		phone := "+1 929 698 3992"
 		twofa := "Fvnh215fgrd"
 
-		// fmt.Print("app_id:")
-		// app_id_s, _ := bufio.NewReader(os.Stdin).ReadString('\n')
-		// app_id_s = strings.ReplaceAll(app_id_s, "\n", "")
-		// app_id, _ := strconv.Atoi(app_id_s)
-
-		// fmt.Print("app_accesshash:")
-		// app_accesshash, _ := bufio.NewReader(os.Stdin).ReadString('\n')
-		// app_accesshash = strings.ReplaceAll(app_accesshash, "\n", "")
-
-		// fmt.Print("phone:")
-		// phone, _ := bufio.NewReader(os.Stdin).ReadString('\n')
-		// phone = strings.ReplaceAll(phone, "\n", "")
-
-		// fmt.Print("2FA:")
-		// twofa, _ := bufio.NewReader(os.Stdin).ReadString('\n')
-		// twofa = strings.ReplaceAll(twofa, "\n", "")
-
+		fmt.Println("Получили данные")
 		codeAsk := func(ctx context.Context, sentCode *tg.AuthSentCode) (string, error) {
 			fmt.Print("code:")
 			code, err := bufio.NewReader(os.Stdin).ReadString('\n')
@@ -146,19 +140,45 @@ func (a *Account) AuthSession(path string) {
 		
 		client := telegram.NewClient(app_id, app_accesshash, telegram.Options{SessionStorage: storage})
 		
+		fmt.Println("next_fun2c")
 		client.Run(ctx, func(ctx context.Context) error {
 			fmt.Println("next_func")
 			res := auth.NewFlow(
 				auth.Constant(phone, twofa, auth.CodeAuthenticatorFunc(codeAsk)),
 				auth.SendCodeOptions{},
 			).Run(ctx, client.Auth())
-			
+
 			storage.WriteFile(filepath.Join(path, "session.session"), 0644)
 			fmt.Println(client.Self(ctx))
 			return res
 		})
-		
+
 	}
+}
+
+func (a *Account) InputAuthAccountData() {
+
+	fmt.Print("app_id:")
+	app_id_s, _ := bufio.NewReader(os.Stdin).ReadString('\n')
+	app_id_s = strings.ReplaceAll(app_id_s, "\n", "")
+	app_id, _ := strconv.Atoi(app_id_s)
+
+	fmt.Print("app_accesshash:")
+	app_accesshash, _ := bufio.NewReader(os.Stdin).ReadString('\n')
+	app_accesshash = strings.ReplaceAll(app_accesshash, "\n", "")
+
+	fmt.Print("phone:")
+	phone, _ := bufio.NewReader(os.Stdin).ReadString('\n')
+	phone = strings.ReplaceAll(phone, "\n", "")
+
+	fmt.Print("2FA:")
+	twofa, _ := bufio.NewReader(os.Stdin).ReadString('\n')
+	twofa = strings.ReplaceAll(twofa, "\n", "")
+
+	a.SetAppID(app_id)
+	a.SetAccessHash(app_accesshash)
+	a.SetTwoFA(twofa)
+	a.SetPhone(phone)
 }
 
 func (a *Account) GetClient() *telegram.Client {
@@ -179,6 +199,18 @@ func (a *Account) GetUsername() string {
 
 func (a *Account) GetPhone() string {
 	return a.phone
+}
+
+func (a *Account) GetAppID() int {
+	return a.app_id
+}
+
+func (a *Account) GetAccessHash() string {
+	return a.app_acceshash
+}
+
+func (a *Account) GetTwoFA() string {
+	return a.twofa
 }
 
 func (a *Account) GetTDataPath() string {
@@ -312,6 +344,18 @@ func (a *Account) SetUsername(username string) {
 
 func (a *Account) SetPhone(phone string) {
 	a.phone = phone
+}
+
+func (a *Account) SetAppID(appID int) {
+	a.app_id = appID
+}
+
+func (a *Account) SetAccessHash(accessHash string) {
+	a.app_acceshash = accessHash
+}
+
+func (a *Account) SetTwoFA(twoFA string) {
+	a.twofa = twoFA
 }
 
 func (a *Account) SetTDataPath(tdata_path string) {
