@@ -46,13 +46,6 @@ type Account struct {
 	Stats         stats.Stats
 }
 
-type accountAuthData struct {
-	app_id        int
-	app_acceshash string
-	phone         string
-	twofa         string
-}
-
 func (a *Account) Connect() {
 	a.Constructor(a.GetTDataPath())
 
@@ -120,11 +113,11 @@ func (a *Account) CheckAcc() bool {
 func (a *Account) AuthSession(path string) {
 	if !a.isSessionFile() {
 		ctx := context.Background()
-		app_id := 20234402
-		// app_id := a.getAppID()
-		app_accesshash := "bdcfbbabf9d21bdf262f7348926ac292"
-		phone := "+1 929 698 3992"
-		twofa := "Fvnh215fgrd"
+		// app_id := 20234402
+		// // app_id := a.getAppID()
+		// app_accesshash := "bdcfbbabf9d21bdf262f7348926ac292"
+		// phone := "+1 929 698 3992"
+		// twofa := "Fvnh215fgrd"
 
 		fmt.Println("Получили данные")
 		codeAsk := func(ctx context.Context, sentCode *tg.AuthSentCode) (string, error) {
@@ -138,13 +131,13 @@ func (a *Account) AuthSession(path string) {
 		}
 		var storage = new(session.StorageMemory)
 		
-		client := telegram.NewClient(app_id, app_accesshash, telegram.Options{SessionStorage: storage})
+		client := telegram.NewClient(a.GetAppID(), a.GetAccessHash(), telegram.Options{SessionStorage: storage})
 		
 		fmt.Println("next_fun2c")
 		client.Run(ctx, func(ctx context.Context) error {
 			fmt.Println("next_func")
 			res := auth.NewFlow(
-				auth.Constant(phone, twofa, auth.CodeAuthenticatorFunc(codeAsk)),
+				auth.Constant(a.GetPhone(), a.GetTwoFA(), auth.CodeAuthenticatorFunc(codeAsk)),
 				auth.SendCodeOptions{},
 			).Run(ctx, client.Auth())
 
@@ -157,28 +150,34 @@ func (a *Account) AuthSession(path string) {
 }
 
 func (a *Account) InputAuthAccountData() {
+	if !a.isSessionFile() {
+		fmt.Println("Введите данные для авторизации ", a.GetTDataPath())
+		fmt.Print("app_id:")
+		app_id_s, _ := bufio.NewReader(os.Stdin).ReadString('\n')
+		app_id_s = strings.ReplaceAll(app_id_s, "\n", "")
+		app_id_s = strings.ReplaceAll(app_id_s, "\r", "")
+		app_id, _ := strconv.Atoi(app_id_s)
 
-	fmt.Print("app_id:")
-	app_id_s, _ := bufio.NewReader(os.Stdin).ReadString('\n')
-	app_id_s = strings.ReplaceAll(app_id_s, "\n", "")
-	app_id, _ := strconv.Atoi(app_id_s)
+		fmt.Print("app_accesshash:")
+		app_accesshash, _ := bufio.NewReader(os.Stdin).ReadString('\n')
+		app_accesshash = strings.ReplaceAll(app_accesshash, "\n", "")
+		app_accesshash = strings.ReplaceAll(app_accesshash, "\r", "")
 
-	fmt.Print("app_accesshash:")
-	app_accesshash, _ := bufio.NewReader(os.Stdin).ReadString('\n')
-	app_accesshash = strings.ReplaceAll(app_accesshash, "\n", "")
+		fmt.Print("phone:")
+		phone, _ := bufio.NewReader(os.Stdin).ReadString('\n')
+		phone = strings.ReplaceAll(phone, "\n", "")
+		phone = strings.ReplaceAll(phone, "\r", "")
 
-	fmt.Print("phone:")
-	phone, _ := bufio.NewReader(os.Stdin).ReadString('\n')
-	phone = strings.ReplaceAll(phone, "\n", "")
+		fmt.Print("2FA:")
+		twofa, _ := bufio.NewReader(os.Stdin).ReadString('\n')
+		twofa = strings.ReplaceAll(twofa, "\n", "")
+		twofa = strings.ReplaceAll(twofa, "\r", "")
 
-	fmt.Print("2FA:")
-	twofa, _ := bufio.NewReader(os.Stdin).ReadString('\n')
-	twofa = strings.ReplaceAll(twofa, "\n", "")
-
-	a.SetAppID(app_id)
-	a.SetAccessHash(app_accesshash)
-	a.SetTwoFA(twofa)
-	a.SetPhone(phone)
+		a.SetAppID(app_id)
+		a.SetAccessHash(app_accesshash)
+		a.SetTwoFA(twofa)
+		a.SetPhone(phone)
+	}
 }
 
 func (a *Account) GetClient() *telegram.Client {
@@ -246,7 +245,7 @@ func (a *Account) GetConfig() config.Configs {
 }
 
 func (a *Account) GetFullName() string {
-	fullname_and_stat := a.GetFirstName() + " " + a.GetLastName() + "(" + a.GetAuthType() + ")" + " (очередь инвайтинга: " + strconv.Itoa(len(a.GetUsers())) + ", очередь постинга: " + strconv.Itoa(len(a.GetPosts())) + ") "
+	fullname_and_stat := a.GetFirstName() + " " + a.GetLastName() + " " + a.GetPhone() + " (" + a.GetAuthType() + ")" + " (очередь инвайтинга: " + strconv.Itoa(len(a.GetUsers())) + ", очередь постинга: " + strconv.Itoa(len(a.GetPosts())) + ") "
 	return fullname_and_stat
 }
 

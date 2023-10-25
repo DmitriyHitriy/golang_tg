@@ -12,6 +12,7 @@ type Configs struct {
 	offer_photo          string
 	parser_auditory_list string
 	parser_content_list  string
+	mode                 int
 }
 
 func (c *Configs) New() *Configs {
@@ -26,6 +27,7 @@ func (c *Configs) New() *Configs {
 	offer_photo, _ := cfg.String("offer_photo")
 	parser_auditory_list, _ := cfg.String("parser_auditory_list")
 	parser_content_list, _ := cfg.String("parser_content_list")
+	mode, _ := cfg.Int("mode")
 
 	if channel_name == "" || channel_desc == "" {
 		panic("channel_name and channel_desc")
@@ -38,6 +40,7 @@ func (c *Configs) New() *Configs {
 	c.setOfferPhoto(offer_photo)
 	c.setParserAuditoryList(parser_auditory_list)
 	c.setParserContentList(parser_content_list)
+	c.setMode(mode)
 
 	return c
 }
@@ -70,6 +73,10 @@ func (c *Configs) GetParserContentList() string {
 	return c.parser_content_list
 }
 
+func (c *Configs) GetMode() int {
+	return c.mode
+}
+
 func (c *Configs) setChannelName(channel_name string) {
 	c.channel_name = channel_name
 }
@@ -96,4 +103,8 @@ func (c *Configs) setParserAuditoryList(parser_auditory_list string) {
 
 func (c *Configs) setParserContentList(parser_content_list string) {
 	c.parser_content_list = parser_content_list
+}
+
+func (c *Configs) setMode(mode int) {
+	c.mode = mode
 }

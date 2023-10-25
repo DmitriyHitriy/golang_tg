@@ -20,7 +20,6 @@ func main() {
 	cfg := cfg.Configs{}
 	cfg.New()
 
-
 	// Собираем и чекаем аккаунты из папки accounts
 	// внутри папки с аккаунтами должны лежать папки внутри которых лежат tdata
 	// accounts - folder_x - tdata
@@ -32,12 +31,16 @@ func main() {
 		tdata_folder_path := filepath.Join(acc_dir, "tdata")
 
 		account := accs.Account{}
-		account.AuthSession(tdata_folder_path)
 		account.Constructor(tdata_folder_path)
 		account.SetConfig(cfg)
 		
+		if cfg.GetMode() == 1 {
+			account.InputAuthAccountData()
+			account.AuthSession(tdata_folder_path)
+		}
 
 		// Проверяем, живой ли аккаунт
+		account.Connect()
 		if account.CheckAcc() {
 			work_accounts.AddAccount(&account)
 		}

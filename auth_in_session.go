@@ -18,7 +18,7 @@ func main4() {
 		storage = new(session.FileStorage)
 	)
 
-	storage.Path = "aaa.session"
+	storage.Path = "session.session"
 	storage.LoadSession(ctx)
 
 	client := telegram.NewClient(1, "s", telegram.Options{SessionStorage: storage})
