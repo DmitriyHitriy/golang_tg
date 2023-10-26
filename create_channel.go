@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -78,7 +79,7 @@ func create_channel(ctx context.Context, name string, about string, raw *tg.Clie
 		ChannelID:  channel.ID,
 		AccessHash: channel.AccessHash,
 	}
-
+	fmt.Println(ch_input)
 	return &ch_input, err
 }
 

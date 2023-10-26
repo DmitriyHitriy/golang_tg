@@ -47,6 +47,8 @@ func iter_message() {
 
 	if err := client.Run(ctx, func(ctx context.Context) error {
 		raw := tg.NewClient(client)
+		//ch_input := tg.InputPeerChannel{ChannelID: 2030944971, AccessHash: -3590252798116749529}
+		
 		//raw.Query(ctx, &query.Query{}
 		cb := func(ctx context.Context, dlg dialogs.Elem) error {
 			// Skip deleted dialogs.
@@ -58,7 +60,16 @@ func iter_message() {
 				if !ok {
 					return nil
 				}
+				
 				peer := msg
+				// var msg_ids []int
+				// msg_ids = append(msg_ids, peer.ID)
+				// req := tg.MessagesForwardMessagesRequest{
+				// 	DropAuthor: true,
+				// 	ToPeer: ch_input,
+				// 	ID: msg_ids,
+				// }
+
 				fmt.Println(peer.Message)
 				time.Sleep(200 * time.Millisecond)
 				return nil

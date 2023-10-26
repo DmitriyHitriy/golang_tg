@@ -104,7 +104,7 @@ func (c *Channel) CreatePost(ctx context.Context, client *telegram.Client, chann
 		if post.Media != nil {
 			type_message = post.Media.TypeName()
 		}
-
+		
 		switch type_message {
 		case "messageMediaPhoto":
 			media := post.Media.(*tg.MessageMediaPhoto)
