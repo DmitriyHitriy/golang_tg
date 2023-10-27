@@ -73,7 +73,7 @@ func main() {
 			case mode == 1:
 				account.Connect()
 				account.Channel.ChannelSendMessage(*account.GetContext(), account.GetClient(), account.Channel.GetUserName(), cfg.GetOfferText(), cfg.GetOfferPhoto())
-			case mode > 1 && mode <= 9:
+			case mode > 1 && mode <= 3:
 				account.Connect()
 				post := account.GetPostNext()
 				if post != nil{
@@ -97,7 +97,7 @@ func main() {
 			time.Sleep(5 * time.Second)
 		}
 
-		log.Print("Спим 5 минут...\n")
+		log.Print("Спим 10 минут...\n")
 		time.Sleep(600 * time.Second)
 	}
 }

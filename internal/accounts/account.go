@@ -119,7 +119,6 @@ func (a *Account) AuthSession(path string) {
 		// phone := "+1 929 698 3992"
 		// twofa := "Fvnh215fgrd"
 
-		fmt.Println("Получили данные")
 		codeAsk := func(ctx context.Context, sentCode *tg.AuthSentCode) (string, error) {
 			fmt.Print("code:")
 			code, err := bufio.NewReader(os.Stdin).ReadString('\n')
@@ -133,9 +132,8 @@ func (a *Account) AuthSession(path string) {
 		
 		client := telegram.NewClient(a.GetAppID(), a.GetAccessHash(), telegram.Options{SessionStorage: storage})
 		
-		fmt.Println("next_fun2c")
 		client.Run(ctx, func(ctx context.Context) error {
-			fmt.Println("next_func")
+			fmt.Println("Запрашиваем код авторизации")
 			res := auth.NewFlow(
 				auth.Constant(a.GetPhone(), a.GetTwoFA(), auth.CodeAuthenticatorFunc(codeAsk)),
 				auth.SendCodeOptions{},
