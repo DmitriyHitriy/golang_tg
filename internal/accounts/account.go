@@ -8,6 +8,7 @@ import (
 	"math/rand"
 	"os"
 	"path/filepath"
+	"path"
 	"strconv"
 	"strings"
 	"time"
@@ -30,6 +31,7 @@ type Account struct {
 	last_name     string
 	username      string
 	phone         string
+	account_name  string
 	app_id        int
 	app_acceshash string
 	twofa         string
@@ -129,9 +131,9 @@ func (a *Account) AuthSession(path string) {
 			return code, nil
 		}
 		var storage = new(session.StorageMemory)
-		
+
 		client := telegram.NewClient(a.GetAppID(), a.GetAccessHash(), telegram.Options{SessionStorage: storage})
-		
+
 		client.Run(ctx, func(ctx context.Context) error {
 			fmt.Println("Запрашиваем код авторизации")
 			res := auth.NewFlow(
@@ -198,6 +200,10 @@ func (a *Account) GetPhone() string {
 	return a.phone
 }
 
+func (a *Account) GetAccountName() string {
+	return a.account_name
+}
+
 func (a *Account) GetAppID() int {
 	return a.app_id
 }
@@ -243,7 +249,7 @@ func (a *Account) GetConfig() config.Configs {
 }
 
 func (a *Account) GetFullName() string {
-	fullname_and_stat := a.GetFirstName() + " " + a.GetLastName() + " " + a.GetPhone() + " (" + a.GetAuthType() + ")" + " (очередь инвайтинга: " + strconv.Itoa(len(a.GetUsers())) + ", очередь постинга: " + strconv.Itoa(len(a.GetPosts())) + ") "
+	fullname_and_stat := a.GetFirstName() + " " + a.GetLastName() + " " + a.GetAccountName() + " (" + a.GetAuthType() + ")" + " (очередь инвайтинга: " + strconv.Itoa(len(a.GetUsers())) + ", очередь постинга: " + strconv.Itoa(len(a.GetPosts())) + ") "
 	return fullname_and_stat
 }
 
@@ -357,6 +363,7 @@ func (a *Account) SetTwoFA(twoFA string) {
 
 func (a *Account) SetTDataPath(tdata_path string) {
 	a.tdata_path = tdata_path
+	a.account_name = path.Base(tdata_path)
 }
 
 func (a *Account) setAuthType(auth_type string) {

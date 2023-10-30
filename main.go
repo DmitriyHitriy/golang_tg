@@ -14,7 +14,7 @@ import (
 )
 
 func main() {
-	
+
 	// Читаем конфигурационный файл
 	// Без него паникуем
 	cfg := cfg.Configs{}
@@ -51,17 +51,10 @@ func main() {
 			account.Connect()
 			account.Channel.Createchannel(account.GetClient(), cfg.GetChannelName(), cfg.GetChannelDesc(), cfg.GetChannelPhoto(), account.GetTDataPath())
 		}
-	}
 
-	// Собираем доноров со списка каналов input/channel_list
-	for _, account := range work_accounts.Accounts {
+		// Получаеи инфо канала
 		account.Connect()
 		account.Channel.GetChannelInfo(*account.GetContext(), account.GetClient(),account.Channel.GetChannel())
-		donor := donors.Donor{Account: account}
-		log.Print(account.GetFullName() + "собирает аудиторию")
-		donor.DonorGetUsers()
-		log.Print(account.GetFullName() + "собирает контент")
-		donor.DonorGetPosts()
 	}
 
 	// Инвайтим юзеров или пишем пост с оффером в группу
@@ -69,6 +62,21 @@ func main() {
 		mode := rand.Intn(20-1) + 1
 
 		for _, account := range work_accounts.Accounts {
+			
+			// Собираем доноров со списка каналов input/channel_list
+			donor := donors.Donor{Account: account}
+			
+			if len(account.GetUsers()) == 0 {
+				log.Print(account.GetFullName() + "собирает аудиторию")
+				donor.DonorGetUsers()
+			}
+
+			if len(account.GetPosts()) == 0 {
+				log.Print(account.GetFullName() + "собирает контент")
+				donor.DonorGetPosts()
+			}
+
+			// Основная работа с аккаунтами
 			switch {
 			case mode == 1:
 				account.Connect()
